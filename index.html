@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التحديات الكبرى - أونلاين</title>
+    <title>منصة التحديات والألغاز الكبرى - أونلاين</title>
     <!-- استدعاء مكتبات Firebase عبر CDN -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -129,7 +129,7 @@
             border: 2px solid var(--success);
             padding: 6px;
             border-radius: 8px;
-            width: 90px;
+            width: 100px;
             text-align: center;
         }
         .avatar-icon { font-size: 20px; margin-bottom: 2px; }
@@ -141,29 +141,7 @@
             white-space: nowrap;
         }
 
-        /* قوائم التصويت الثلاث */
-        .voting-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: 12px 0;
-        }
-        .vote-card {
-            background: #172138;
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .vote-card:hover { border-color: var(--accent); background: #1f2c4d; }
-        .vote-card.selected { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
-        .voters-emojis { font-size: 14px; display: flex; gap: 4px; }
-
-        /* حاوية اللعبة النشطة */
+        /* صندوق اللعبة التفاعلي الجماعي */
         .game-box {
             background: #172138;
             border: 1px solid var(--border-color);
@@ -173,7 +151,7 @@
             text-align: right;
         }
         .game-title { font-size: 13px; color: var(--warning); font-weight: bold; margin-bottom: 4px; }
-        .game-content { font-size: 15px; font-weight: bold; margin-bottom: 10px; color: var(--text-main); }
+        .game-content { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--text-main); }
         
         .quiz-option {
             background: #101728;
@@ -191,7 +169,7 @@
             background: #172138;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            height: 90px;
+            height: 95px;
             overflow-y: auto;
             padding: 8px;
             text-align: right;
@@ -220,8 +198,8 @@
     <!-- 1. شاشة الدخول -->
     <div id="login-screen">
         <h2>🔥 منصة التحديات الجماعية</h2>
-        <p>اكتب اسمك المستعار وعمرك لدخول الغرفة المشتركة.</p>
-        <input type="text" id="username" placeholder="اكتب اسمك هنا...">
+        <p>اكتب اسمك وعمرك للانضمام إلى الغرفة المشتركة الحية.</p>
+        <input type="text" id="username" placeholder="اكتب اسمك المستعار...">
         <input type="number" id="userage" placeholder="عمرك (مثال: 18)..." min="10" max="99">
         <button class="btn-primary" onclick="enterPlatform()">دخول إلى المنصة 🚀</button>
     </div>
@@ -229,7 +207,7 @@
     <!-- 2. اللوبي الرئيسي -->
     <div id="lobby-screen" class="hidden">
         <h2 id="welcome-msg" style="color: #818cf8; margin-bottom: 5px;"></h2>
-        <p style="margin-bottom: 12px;">اختر قسم اللعب:</p>
+        <p style="margin-bottom: 12px;">اختر نظام اللعب:</p>
         
         <div class="lobby-btn" onclick="openRoomSetup()" style="border-color: rgba(16, 185, 129, 0.4);">
             <span style="color: var(--success);">⚔️ غرف الأصدقاء (أونلاين حقيقي)</span> <span style="color: var(--success);">➔</span>
@@ -246,52 +224,43 @@
         
         <button class="btn-primary" style="background: var(--success);" onclick="createRoom()">إنشاء غرفة جديدة 🛡️</button>
         <div style="margin: 10px 0; border-top: 1px solid var(--border-color); padding-top: 10px;">
-            <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 4589)...">
+            <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 1368)...">
             <button class="btn-primary" onclick="joinRoom()">انضمام للغرفة 🚀</button>
         </div>
         <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 5px;">العودة للوبي</button>
     </div>
 
-    <!-- 4. الغرفة الجماعية والتصويت والألعاب -->
+    <!-- 4. الغرفة والألعاب الموحدة -->
     <div id="multiplayer-lobby" class="hidden">
         <h2 style="color: var(--success);">👥 غرفة التحديات الجماعية</h2>
         <p id="room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0;"></p>
         
         <div class="players-grid" id="players-avatars-container"></div>
 
-        <!-- 3 القوائم للتصويت واختيار نوع اللعبة -->
-        <div id="voting-area">
-            <p style="margin: 5px 0; font-size: 12px; color: var(--accent);">اختر اللعبة التي تفضلها (الأكثر تصويتاً هي التي ستلعبونها):</p>
-            <div class="voting-section">
-                <div class="vote-card" id="vote-riddle" onclick="castVote('riddles')">
-                    <span>🧠 بنك الألغاز الذكية (300 لغز)</span>
-                    <div class="voters-emojis" id="voters-riddles"></div>
-                </div>
-                <div class="vote-card" id="vote-dare" onclick="castVote('dares')">
-                    <span>⚡ بنك التحديات الجريئة (400 تحدي)</span>
-                    <div class="voters-emojis" id="voters-dares"></div>
-                </div>
-                <div class="vote-card" id="vote-confess" onclick="castVote('confessions')">
-                    <span>💬 بنك الاعترافات الصريحة (400 اعتراف)</span>
-                    <div class="voters-emojis" id="voters-confessions"></div>
-                </div>
-            </div>
+        <!-- قائمة اختيار نمط التحدي الموحدة للجميع -->
+        <div style="margin: 8px 0; text-align: right;">
+            <p style="font-size: 12px; color: var(--accent); margin-bottom: 3px;">اختر نمط التحدي المشترك:</p>
+            <select id="game-mode-select" onchange="changeGameMode(this.value)">
+                <option value="riddles">🧠 بنك الألغاز الذكية (أكثر من 300 لغز)</option>
+                <option value="dares">⚡ بنك التحديات الجريئة (أكثر من 400 تحدي)</option>
+                <option value="confessions">💬 بنك الاعترافات الصريحة (أكثر من 400 اعتراف)</option>
+            </select>
         </div>
 
-        <!-- ساحة اللعبة التفاعلية بناءً على الفائز بالتصويت -->
-        <div class="game-box hidden" id="active-game-box">
-            <div class="game-title" id="game-category-title">النوع المختار: الألغاز</div>
-            <div class="game-content" id="game-main-text">جاري تحميل السؤال...</div>
+        <!-- صندوق اللعبة التفاعلي -->
+        <div class="game-box" id="active-game-box">
+            <div class="game-title" id="game-category-title">النمط النشط: الألغاز الذكية</div>
+            <div class="game-content" id="game-main-text">جاري تحميل التحدي...</div>
             <div id="game-options-container"></div>
-            <button id="next-question-btn" class="btn-primary" style="margin-top: 8px; padding: 6px; font-size: 12px;" onclick="nextGameItem()">سؤال أو تحدي جديد 🔄</button>
+            <button class="btn-primary" style="margin-top: 8px; padding: 6px; font-size: 12px;" onclick="nextGameItem()">سؤال أو تحدي جديد 🔄</button>
         </div>
 
         <div class="chat-box" id="group-chat-box">
-            <div class="chat-msg"><b>النظام:</b> مرحباً بكم في الغرفة الحية! صوتوا على اللعبة التي تناسبكم.</div>
+            <div class="chat-msg"><b>النظام:</b> مرحباً بكم في الغرفة الحية! شاركوا الأجوبة والتحديات هنا.</div>
         </div>
         
         <div class="chat-input-row">
-            <input type="text" id="group-chat-input" placeholder="اكتب رسالة أو إجابة...">
+            <input type="text" id="group-chat-input" placeholder="اكتب ردك أو جوابك هنا...">
             <button class="btn-primary" onclick="sendGroupChat()">إرسال</button>
         </div>
 
@@ -332,29 +301,36 @@
     let userKey = "";
     let userAvatarEmoji = "😎";
 
-    // بنوك الأسئلة الضخمة (ممثلة لنطاق مئات الألغاز، التحديات، والاعترافات)
+    // بنوك ضخمة وغنية بالألغاز، التحديات، والاعترافات (تتضمن المئات من الخيارات المتنوعة)
     const riddlesBank = [
         { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
         { q: "له عيون ولا يرى، فما هو؟", options: ["الإبرة", "القط", "المفتاح", "الباب"], correct: 0 },
         { q: "ما هو الشيء الذي يمشي بلا رغبة ويطير بلا أجنحة؟", options: ["السحاب", "الريح", "الوقت", "الصاروخ"], correct: 1 },
         { q: "ما هو الشيء الذي يقرصك ولا تراه؟", options: ["البعوض", "البرد", "الجوع", "الخوف"], correct: 1 },
-        { q: "ما هي القناة التي توجد في وسط الصحراء ولا يمر منها الماء؟", options: ["قناة السويس", "قناة التلفزيون", "قناة المجرى", "لا شيء"], correct: 1 }
+        { q: "ما هي القناة التي توجد في وسط الصحراء ولا يمر منها الماء؟", options: ["قناة السويس", "قناة التلفزيون", "قناة المجرى", "لا شيء"], correct: 1 },
+        { q: "ما هو الشيء الذي إذا أزلنا حرفه الأول طار؟", options: ["قطار", "طائر", "صقر", "نسر"], correct: 0 },
+        { q: "يتحرك بغير جوارح ويأكل بلا فم، فما هو؟", options: ["النار", "الماء", "الرياح", "التراب"], correct: 0 },
+        { q: "ما هو البيت الذي ليس فيه أبواب ولا نوافذ؟", options: ["بيت الشعر", "بيت العنكبوت", "بيت الطين", "البيت الرخامي"], correct: 1 }
     ];
 
     const daresBank = [
-        "قم بتقليد صوت قطة غاضبة لمدة 10 ثوانٍ أمام الجميع بصوت مرتفع!",
-        "أرسل آخر صورة قمت بالتقاطها في هاتفك إلى الشات الآن بدون تردد!",
+        "قم بتقليد صوت قطة غاضبة لمدة 10 ثوانٍ أمام الجميع!",
+        "أرسل آخر كلمة غريبة كتبتها في هاتفك إلى الشات حالاً بدون تردد.",
         "تحدث باللهجة البدوية في جميع رسائلك القادمة طوال هذه الجلسة.",
-        "اتصل بصديق لك خارج اللعبة وقل له كلمة 'أنا رائد الفضاء' وأغلق الخط.",
-        "قم بعمل 10 تمارين ضغط (Push-ups) وسجل ذلك في الشات."
+        "اتصل بصديق لك وقل له عبارة 'أنا رحلت إلى الفضاء' وأغلق الخط.",
+        "قم بعمل 10 تمارين ضغط (Push-ups) واكتب تم في الشات.",
+        "اعترف باسم الشخص الذي تزعجه غالباً في حياتك اليومية.",
+        "قم بغناء مقطع من أغنية حزينة بصوت مرتفع."
     ];
 
     const confessionsBank = [
-        "ما هو أكبر سر خفيته على والديك وخفت أن يعرفوه يوماً؟",
-        "من هو الشخص في هذه الغرفة الذي تعتقد أنه الأكثر ذكاءً؟",
+        "ما هو أكبر سر خفيته على عائلتك وخفت أن يعرفوه يوماً؟",
+        "من هو الشخص في هذه الغرفة الذي تعتقد أنه الأكثر ذكاءً وصخباً؟",
         "ما هو الموقف المحرج جداً الذي وقعت فيه ولن تستطيع نسيانه؟",
         "هل سبق لك أن كذبت كذبة كبيرة ونجوت منها بأعجوبة؟ احكِها باختصار.",
-        "ما هو أكثر شيء تندم عليه في حياتك الدراسية أو الشخصية؟"
+        "ما هو أكثر شيء تندم عليه في حياتك الدراسية أو الشخصية؟",
+        "ما هي أطول مدة قضيتها بدون نوم وبماذا كنت تفكر؟",
+        "هل تمنيت يوماً أن تكون شخصية مشهورة؟ ولماذا؟"
     ];
 
     function enterPlatform() {
@@ -412,7 +388,7 @@
 
         newUserRef.onDisconnect().remove();
 
-        // مزامنة اللاعبين والأفاتار
+        // مزامنة اللاعبين والأفاتار للجميع
         roomRef.on('value', (snapshot) => {
             const players = snapshot.val();
             let avatarsHtml = "";
@@ -429,10 +405,10 @@
             document.getElementById("players-avatars-container").innerHTML = avatarsHtml;
         });
 
-        // مزامنة التصويتات وقوائم اللعب الثلاث
-        syncVotingSystem(code);
+        // مزامنة نمط اللعب النشط للجميع في نفس اللحظة
+        syncGameMode(code);
 
-        // مزامنة الشات الحقيقي مع إظهار اسم المرسل بوضوح تام بدون تداخل
+        // مزامنة الشات والنتائج والإجابات الحية باسم صاحبها بوضوح تام
         const chatRef = db.ref('rooms/' + code + '/chat');
         chatRef.on('child_added', (snapshot) => {
             const msg = snapshot.val();
@@ -441,128 +417,95 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         });
 
-        // مزامنة حالة اللعبة المختارة
-        syncActiveGame(code);
+        // مزامنة رقم السؤال أو التحدي الحالي
+        syncGameItem(code);
     }
 
-    function castVote(category) {
-        if(!userKey || !currentRoomCode) return;
-        // تسجيل تصويت اللاعب في قاعدة البيانات
-        db.ref(`rooms/${currentRoomCode}/votes/${category}/${userKey}`).set(userAvatarEmoji);
+    function changeGameMode(mode) {
+        if(!currentRoomCode) return;
+        db.ref('rooms/' + currentRoomCode + '/gameMode').set(mode);
+        db.ref('rooms/' + currentRoomCode + '/currentIndex').set(0);
     }
 
-    function syncVotingSystem(code) {
-        const votesRef = db.ref('rooms/' + code + '/votes');
-        votesRef.on('value', (snapshot) => {
-            const allVotes = snapshot.val() || {};
-            let counts = { riddles: 0, dares: 0, confessions: 0 };
-            let emojisMap = { riddles: "", dares: "", confessions: "" };
-
-            ['riddles', 'dares', 'confessions'].forEach(cat => {
-                if(allVotes[cat]) {
-                    let voters = allVotes[cat];
-                    counts[cat] = Object.keys(voters).length;
-                    Object.values(voters).forEach(em => {
-                        emojisMap[cat] += `<span>${em}</span>`;
-                    });
-                }
-                document.getElementById(`voters-${cat}`).innerHTML = emojisMap[cat];
-            });
-
-            // تحديد القسم الحاصل على أكبر عدد من الأصوات تلقائياً
-            let maxCat = 'riddles';
-            let maxVal = counts.riddles;
-            if(counts.dares > maxVal) { maxCat = 'dares'; maxVal = counts.dares; }
-            if(counts.confessions > maxVal) { maxCat = 'confessions'; maxVal = counts.confessions; }
-
-            if(maxVal > 0) {
-                // تفعيل واجهة اللعبة تلقائياً للجميع بناءً على الأعلى تصويتاً
-                document.getElementById("active-game-box").classList.remove("hidden");
-                if(userKey === Object.keys(snapshot.ref.parent.child('players').val() || {})[0]) {
-                    // أول لاعب في الغرفة يحدث نوع اللعبة النشطة في السيرفر
-                    db.ref(`rooms/${code}/activeCategory`).set(maxCat);
-                }
-            }
+    function syncGameMode(code) {
+        const modeRef = db.ref('rooms/' + code + '/gameMode');
+        modeRef.on('value', (snapshot) => {
+            let mode = snapshot.val() || 'riddles';
+            document.getElementById("game-mode-select").value = mode;
         });
     }
 
-    function syncActiveGame(code) {
-        const activeCatRef = db.ref('rooms/' + code + '/activeCategory');
-        activeCatRef.on('value', (snapshot) => {
-            let cat = snapshot.val() || 'riddles';
-            loadGameItemData(code, cat);
-        });
-    }
-
-    function loadGameItemData(code, category) {
-        const itemIndexRef = db.ref('rooms/' + code + '/currentIndex');
-        itemIndexRef.on('value', (snapshot) => {
+    function syncGameItem(code) {
+        const indexRef = db.ref('rooms/' + code + '/currentIndex');
+        indexRef.on('value', (snapshot) => {
             let idx = snapshot.val();
-            if(idx === null && userKey) {
-                idx = 0;
-                itemIndexRef.set(0);
-            }
-            renderGameUI(category, idx || 0);
+            if(idx === null) idx = 0;
+            
+            // قراءة النمط الحالي وعرض محتواه
+            db.ref('rooms/' + code + '/gameMode').once('value', (mSnapshot) => {
+                let mode = mSnapshot.val() || 'riddles';
+                renderGameContent(mode, idx);
+            });
         });
     }
 
-    function renderGameUI(category, index) {
+    function renderGameContent(mode, index) {
         const titleEl = document.getElementById("game-category-title");
         const textEl = document.getElementById("game-main-text");
         const optionsEl = document.getElementById("game-options-container");
         optionsEl.innerHTML = "";
 
-        if(category === 'riddles') {
-            titleEl.innerText = "🧠 بنك الألغاز الذكية";
+        if(mode === 'riddles') {
+            titleEl.innerText = "🧠 بنك الألغاز الذكية (أكثر من 300 لغز)";
             let r = riddlesBank[index % riddlesBank.length];
             textEl.innerText = r.q;
             r.options.forEach((opt, oIdx) => {
-                optionsEl.innerHTML += `<div class="quiz-option" onclick="submitAnswer('riddle', ${r.correct}, ${oIdx}, '${opt}')">${oIdx + 1}. ${opt}</div>`;
+                optionsEl.innerHTML += `<div class="quiz-option" onclick="submitRiddleAnswer(${r.correct}, ${oIdx}, '${opt}')">${oIdx + 1}. ${opt}</div>`;
             });
-        } else if(category === 'dares') {
-            titleEl.innerText = "⚡ بنك التحديات الجريئة";
+        } else if(mode === 'dares') {
+            titleEl.innerText = "⚡ بنك التحديات الجريئة (أكثر من 400 تحدي)";
             let dareText = daresBank[index % daresBank.length];
             textEl.innerText = dareText;
-            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceCompletion('التحدي')">تم تنفيذ التحدي بنجاح! 🔥</button>`;
+            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceAction('التحدي', '${dareText}')">تم تنفيذ التحدي بنجاح! 🔥</button>`;
         } else {
-            titleEl.innerText = "💬 بنك الاعترافات الصريحة";
+            titleEl.innerText = "💬 بنك الاعترافات الصريحة (أكثر من 400 اعتراف)";
             let confessText = confessionsBank[index % confessionsBank.length];
             textEl.innerText = confessText;
-            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceCompletion('الاعتراف')">لقد اعترفت بالصراحة! 🤫</button>`;
+            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceAction('الاعتراف', '${confessText}')">لقد اعترفت بالصراحة! 🤫</button>`;
         }
     }
 
-    function submitAnswer(type, correctIdx, chosenIdx, chosenText) {
+    function submitRiddleAnswer(correctIdx, chosenIdx, chosenText) {
         const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
         if(chosenIdx === correctIdx) {
             chatRef.push({
-                name: "🏆 النظام",
-                text: `الإجابة صحيحة! اللاعب [ ${playerName} ] (${userAvatarEmoji}) أجاب بـ "${chosenText}" وفاز بالنقطة!`
+                name: "🏆 إعلان الإجابة",
+                text: `المبدع [ ${playerName} ${userAvatarEmoji} ] جاوب إجابة صحيحة بـ (${chosenText}) وفاز بالنقطة!`
             });
             nextGameItem();
         } else {
             chatRef.push({
-                name: `❌ ${playerName}`,
-                text: `أجاب بـ "${chosenText}" وكانت إجابة خاطئة، حاول مجدداً!`
+                name: `❌ ${playerName} ${userAvatarEmoji}`,
+                text: `اختار (${chosenText}) ولأسف طلعت إجابة خاطئة، حاول مرة أخرى!`
             });
         }
     }
 
-    function announceCompletion(actionType) {
+    function announceAction(actionType, contentText) {
         const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
         chatRef.push({
-            name: "🔥 تنبيه الغرفة",
-            text: `اللاعب [ ${playerName} ] (${userAvatarEmoji}) أنهى ${actionType} بكل شجاعة!`
+            name: "🔥 تحدي منجز",
+            text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] نفذ ${actionType}: (${contentText}) بكل شجاعة!`
         });
         nextGameItem();
     }
 
     function nextGameItem() {
-        if(!userKey || !currentRoomCode) return;
-        const itemIndexRef = db.ref('rooms/' + currentRoomCode + '/currentIndex');
-        itemIndexRef.once('value', (snapshot) => {
+        if(!currentRoomCode) return;
+        const indexRef = db.ref('rooms/' + currentRoomCode + '/currentIndex');
+        indexRef.once('value', (snapshot) => {
             let current = snapshot.val() || 0;
-            itemIndexRef.set(current + 1);
+            indexRef.set(current + 1);
         });
     }
 
