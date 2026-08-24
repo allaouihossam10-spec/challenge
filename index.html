@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة التحديات والألغاز الجماعية الاحترافية</title>
-    <!-- استدعاء مكتبات Firebase (Auth و Database) -->
+    <!-- استدعاء مكتبة Firebase Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
     <style>
@@ -102,18 +101,6 @@
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
         }
         .btn-primary:hover { transform: translateY(-2px); }
-
-        .btn-google {
-            background: #ffffff;
-            color: #0f172a;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
-        }
-        .btn-google:hover { background: #f1f5f9; transform: translateY(-2px); }
 
         .lobby-btn {
             background: #172138;
@@ -257,24 +244,27 @@
 <body>
 
 <div class="container">
-    <!-- 1. شاشة تسجيل الدخول الإجباري عبر الجيماي (Google) -->
+    <!-- 1. شاشة الدخول بالاسم والأفاتار المباشر -->
     <div id="login-screen">
         <h2>🔥 منصة التحديات والألغاز الجماعية</h2>
-        <p>يجب تسجيل الدخول بواسطة حساب Gmail حقيقي للوصول إلى المنصة والمشاركة:</p>
-        
-        <div style="margin: 30px 0;">
-            <button class="btn-google" onclick="loginWithGoogle()">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.4l3.7 2.9C6.5 7.2 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/><path fill="#FBBC05" d="M5.6 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.9 6.4C.7 8.8 0 11.3 0 14s.7 5.2 1.9 7.6l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.2-6.4-5.2L1.9 16c1.8 3.8 5.6 7 10.1 7z"/></svg>
-                الدخول باستخدام حساب Google (Gmail)
-            </button>
+        <p>اكتب اسمك المستعار واختر أفتار بروفيلك للدخول إلى المنصة:</p>
+        <input type="text" id="username" placeholder="اكتب اسمك المستعار هنا...">
+        <p style="margin: 10px 0 0 0; font-size: 13px;">اختر صورة البروفيل:</p>
+        <div class="avatar-selector" id="login-avatar-picker">
+            <div class="avatar-option selected" onclick="selectLoginAvatar('😎', this)">😎</div>
+            <div class="avatar-option" onclick="selectLoginAvatar('🦊', this)">🦊</div>
+            <div class="avatar-option" onclick="selectLoginAvatar('🐯', this)">🐯</div>
+            <div class="avatar-option" onclick="selectLoginAvatar('🤖', this)">🤖</div>
+            <div class="avatar-option" onclick="selectLoginAvatar('👻', this)">👻</div>
         </div>
+        <button class="btn-primary" onclick="enterPlatform()" style="margin-top: 15px;">دخول إلى المنصة 🚀</button>
     </div>
 
     <!-- 2. اللوبي الرئيسي -->
     <div id="lobby-screen" class="hidden">
         <div>
             <h2 id="welcome-msg" style="color: #818cf8; margin-bottom: 5px;"></h2>
-            <p style="margin-bottom: 15px;" id="user-email-tag"></p>
+            <p style="margin-bottom: 15px;">اختر وجهتك:</p>
             
             <div class="lobby-btn" onclick="openProfile()" style="border-color: rgba(99, 102, 241, 0.4);">
                 <span style="color: #818cf8;">👤 ملفي الشخصي (البروفيل، الأيدي، الإحصائيات)</span> <span>➔</span>
@@ -286,7 +276,7 @@
                 <span style="color: var(--warning);">🏆 لوحة المتصدرين العامة</span> <span style="color: var(--warning);">➔</span>
             </div>
         </div>
-        <button onclick="logout()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 15px; padding: 8px;">تسجيل الخروج من الحساب</button>
+        <button onclick="logout()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 15px; padding: 8px;">تسجيل الخروج وتغيير الاسم</button>
     </div>
 
     <!-- 3. شاشة البروفيل الشخصي -->
@@ -405,18 +395,16 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.database();
 
-    let playerName = "";
-    let playerEmail = "";
+    let playerName = localStorage.getItem("playerName") || "";
     let currentRoomCode = "";
-    let userKey = "";
-    let userAvatarEmoji = "😎";
-    let myScore = 0;
-    let answeredCount = 0;
+    let userKey = localStorage.getItem("userKey") || "";
+    let userAvatarEmoji = localStorage.getItem("userAvatar") || "😎";
+    let myScore = parseInt(localStorage.getItem("myScore") || "0");
+    let answeredCount = parseInt(localStorage.getItem("answeredCount") || "0");
+    let currentSelectedLoginAvatar = "😎";
 
-    // بنك ألغاز كبير ومتنوع موسع
     const riddlesBank = [
         { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
         { q: "له عيون ولا يرى، فما هو؟", options: ["الإبرة", "القط", "المفتاح", "الباب"], correct: 0 },
@@ -446,42 +434,48 @@
         "ما هو أكثر شيء تندم عليه في حياتك الدراسية أو الشخصية؟"
     ];
 
-    // التحقق التلقائي من حالة تسجيل الدخول عبر Firebase Auth
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            playerEmail = user.email;
-            playerName = (user.displayName || user.email.split('@')[0]).toUpperCase();
-            userAvatarEmoji = localStorage.getItem("userAvatar") || "😎";
-            myScore = parseInt(localStorage.getItem("myScore") || "0");
-            answeredCount = parseInt(localStorage.getItem("answeredCount") || "0");
-            
-            if(!localStorage.getItem("myId")) {
-                localStorage.setItem("myId", "ID-" + Math.floor(100000 + Math.random() * 900000));
-            }
-
+    window.onload = function() {
+        if(playerName) {
             hideAllScreens();
             document.getElementById("lobby-screen").classList.remove("hidden");
             document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
-            document.getElementById("user-email-tag").innerText = `الحساب المسجل: ${playerEmail}`;
-        } else {
-            hideAllScreens();
-            document.getElementById("login-screen").classList.remove("hidden");
         }
-    });
+    };
 
-    function loginWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch((error) => {
-            alert("خطأ في تسجيل الدخول: " + error.message);
-        });
+    function selectLoginAvatar(emoji, element) {
+        currentSelectedLoginAvatar = emoji;
+        document.querySelectorAll('#login-avatar-picker .avatar-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+    }
+
+    function enterPlatform() {
+        const nameInput = document.getElementById("username").value.trim();
+        if(!nameInput) {
+            alert("المرجو إكتب اسمك المستعار أولاً!");
+            return;
+        }
+        playerName = nameInput.toUpperCase();
+        userAvatarEmoji = currentSelectedLoginAvatar;
+        
+        localStorage.setItem("playerName", playerName);
+        localStorage.setItem("userAvatar", userAvatarEmoji);
+        if(!localStorage.getItem("myId")) {
+            localStorage.setItem("myId", "ID-" + Math.floor(100000 + Math.random() * 900000));
+        }
+        
+        hideAllScreens();
+        document.getElementById("lobby-screen").classList.remove("hidden");
+        document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
     }
 
     function logout() {
-        auth.signOut().then(() => {
-            localStorage.clear();
-            hideAllScreens();
-            document.getElementById("login-screen").classList.remove("hidden");
-        });
+        localStorage.clear();
+        playerName = "";
+        userKey = "";
+        myScore = 0;
+        answeredCount = 0;
+        hideAllScreens();
+        document.getElementById("login-screen").classList.remove("hidden");
     }
 
     function openProfile() {
@@ -633,7 +627,7 @@
             let r = riddlesBank[index % riddlesBank.length];
             textEl.innerText = r.q;
             
-            let optionPairs = r.options.map((opt, i) => ({ text: opt, isCorrect: (i === r.correct) }));
+            let optionPairs = r.options.map((opt, i) => ({ text: opt, isCorrect: (i === r.correct) })) ;
             optionPairs.sort(() => Math.random() - 0.5);
 
             optionPairs.forEach((item, oIdx) => {
@@ -665,7 +659,7 @@
 
             chatRef.push({
                 name: "🏆 إجابة صحيحة",
-                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أاب بـ (${chosenText}) وربح نقطة!`
+                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أجاب بـ (${chosenText}) وربح نقطة!`
             });
             nextTurn();
         } else {
