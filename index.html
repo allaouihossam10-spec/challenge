@@ -121,7 +121,7 @@
 
     function selectAnswer(selectedIndex) {
         if(selectedIndex === questions[currentQuestion].answer) {
-            score += 20; // 5 أسئلة × 20 = 100 نقطة
+            score += 20; 
         }
         currentQuestion++;
         showQuestion();
@@ -130,7 +130,7 @@
     function showResult() {
         document.getElementById("quiz-screen").classList.add("hidden");
         document.getElementById("result-screen").classList.remove("hidden");
-        document.getElementById("final-score-textinnerHTML = `مرحباً <span class=\"badge\">${playerName}</span>، نتيجتك هي: <b>${score} / 100</b>`;
+        document.getElementById("final-score-text").innerHTML = `مرحباً <span class="badge">${playerName}</span>، نتيجتك هي: <b>${score} / 100</b>`;
 
         let leaderboard = JSON.parse(localStorage.getItem("quiz_leaderboard") || "[]");
         leaderboard.push({name: playerName, score: score});
