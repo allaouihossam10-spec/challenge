@@ -287,11 +287,11 @@
     <!-- 1. شاشة الدخول بالاسم وكلمة المرور -->
     <div id="login-screen">
         <h2>🔥 منصة التحديات والألغاز الجماعية</h2>
-        <p>اكتب اسمك، كلمة المرور، ورابط صورة بروفيلك (أو تركها فارغة لصورة افتراضية):</p>
+        <p>اكتب اسمك، كلمة المرور، ورابط صورة بروفيلك المباشر (أو تركها فارغة لصورة افتراضية):</p>
         
         <input type="text" id="username" placeholder="اكتب اسمك المستعار هنا...">
         <input type="password" id="userpass" placeholder="اكتب كلمة المرور الخاصة بك...">
-        <input type="text" id="useravatar-input" placeholder="رابط صورة البروفيل (مثال: https://i.imgur.com/...)" style="font-size: 13px;">
+        <input type="text" id="useravatar-input" placeholder="رابط صورة مباشر ينتهي بـ .jpg أو .png" style="font-size: 13px;">
         
         <button class="btn-primary" onclick="verifyAndLogin()" style="margin-top: 15px;">دخول إلى المنصة 🚀</button>
     </div>
@@ -307,6 +307,9 @@
             </div>
             <div class="lobby-btn" onclick="openRoomSetup()" style="border-color: rgba(16, 185, 129, 0.4);">
                 <span style="color: var(--success);">⚔️ غرف الأصدقاء (تحديات ونقاط)</span> <span style="color: var(--success);">➔</span>
+            </div>
+            <div class="lobby-btn" onclick="openUndercoverSetup()" style="border-color: rgba(245, 158, 11, 0.4);">
+                <span style="color: var(--warning);">🕵️‍♂️ لعبة المحتال بالإيموجي (السرية والتصويت)</span> <span style="color: var(--warning);">➔</span>
             </div>
 
             <!-- لوحة تحكم الآدمن الخاصة -->
@@ -358,14 +361,14 @@
                 </div>
             </div>
 
-            <p style="font-size: 13px; text-align: right;">تغيير رابط صورة البروفيل:</p>
-            <input type="text" id="new-avatar-url-input" placeholder="ألصق رابط الصورة الجديدة هنا..." style="font-size: 13px; margin-top: 0;">
+            <p style="font-size: 13px; text-align: right;">تغيير رابط صورة البروفيل المباشر:</p>
+            <input type="text" id="new-avatar-url-input" placeholder="ألصق رابط الصورة المباشر هنا..." style="font-size: 13px; margin-top: 0;">
             <button class="btn-primary" onclick="updateProfileAvatarUrl()" style="padding: 10px; font-size: 13px; margin-top: 5px;">حفظ الصورة الجديدة 🖼️</button>
         </div>
         <button class="btn-primary" onclick="backToLobby()" style="margin-top: 15px;">العودة إلى اللوبي</button>
     </div>
 
-    <!-- 4. إعداد الغرفة -->
+    <!-- 4. إعداد غرفة التحديات العادية -->
     <div id="room-setup-screen" class="hidden">
         <div>
             <h2 style="color: var(--success);">🎮 غرف الأصدقاء</h2>
@@ -380,7 +383,22 @@
         <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 10px;">العودة للوبي</button>
     </div>
 
-    <!-- 5. الغرفة الجماعية -->
+    <!-- 5. إعداد غرفة المحتال بالإيموجي -->
+    <div id="undercover-setup-screen" class="hidden">
+        <div>
+            <h2 style="color: var(--warning);">🕵️‍♂️ غرفة لعبة المحتال بالإيموجي</h2>
+            <p>انضم لغرفة أصدقائك بوضع الكود الخاص بالغرفة للعب جماعياً وكشف المحتال.</p>
+            
+            <button class="btn-primary" style="background: var(--warning); color: #070913;" onclick="createUndercoverRoom()">إنشاء غرفة محتال جديدة 🕵️‍♂️</button>
+            <div style="margin: 15px 0; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <input type="text" id="undercover-code-input" placeholder="أدخل رمز غرفة المحتال (مثال: 4521)...">
+                <button class="btn-primary" style="background: var(--warning); color: #070913;" onclick="joinUndercoverRoom()">انضمام لغرفة المحتال 🚀</button>
+            </div>
+        </div>
+        <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 10px;">العودة للوبي</button>
+    </div>
+
+    <!-- 6. الغرفة الجماعية للتحديات العادية -->
     <div id="multiplayer-lobby" class="hidden">
         <div>
             <h2 style="color: var(--success); margin-bottom: 2px;">⚡ غرفة التحديات والنقاط الحية</h2>
@@ -417,6 +435,43 @@
             <button onclick="leaveRoom()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 5px; padding: 6px;">مغادرة الغرفة</button>
         </div>
     </div>
+
+    <!-- 7. غرفة لعبة المحتال بالإيموجي التفاعلية -->
+    <div id="undercover-lobby" class="hidden">
+        <div>
+            <h2 style="color: var(--warning); margin-bottom: 2px;">🕵️‍♂️ صالون المحتال والإيموجي الحّي</h2>
+            <p id="undercover-room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0 10px 0;"></p>
+            
+            <div class="players-grid" id="undercover-players-container"></div>
+
+            <div class="game-box" id="undercover-game-box">
+                <div class="game-title">🔐 كلمتك السرية أو دورك في الجولة:</div>
+                <div class="game-content" id="undercover-my-role-display" style="font-size: 15px; color: var(--warning);">اضغط على الزر أدناه لمعرفة دورك سراً!</div>
+                <button class="btn-primary" style="background: var(--warning); color: #070913; margin-bottom: 10px;" onclick="revealMyUndercoverWord()">اضغط مطولاً / أكشف دوري سراً 👁️</button>
+                
+                <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;">🗳️ مرحلة التصويت على المحتال:</div>
+                    <select id="vote-suspect-select">
+                        <option value="">اختر الشخص الذي تشك أنه المحتال...</option>
+                    </select>
+                    <button class="btn-primary" style="background: var(--danger); padding: 10px; font-size: 13px;" onclick="castUndercoverVote()">تثبيت التصويت ضده 🚨</button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="chat-box" id="undercover-chat-box">
+                <div class="chat-msg"><b>النظام:</b> مرحباً بكم في لعبة المحتال! تحدثوا بحذر واكتشفوا من هو المحتال بالإيموجي.</div>
+            </div>
+            
+            <div class="chat-input-row">
+                <input type="text" id="undercover-chat-input" placeholder="اكتب رسالة نقاش..." onkeypress="if(event.key === 'Enter') sendUndercoverChat()">
+                <button class="btn-primary" style="background: var(--warning); color: #070913;" onclick="sendUndercoverChat()">إرسال</button>
+            </div>
+
+            <button onclick="leaveUndercoverRoom()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 5px; padding: 6px;">مغادرة الغرفة</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -431,13 +486,16 @@
         measurementId: "G-C8GKFXYD41"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
 
     let playerName = localStorage.getItem("playerName") || "";
     let playerPass = localStorage.getItem("playerPass") || "";
     let userCloudKey = localStorage.getItem("userCloudKey") || "";
     let currentRoomCode = "";
+    let currentUndercoverRoomCode = "";
     let userAvatarUrl = localStorage.getItem("userAvatarUrl") || "https://i.imgur.com/6VBx3io.png";
     let myScore = parseInt(localStorage.getItem("myScore") || "0");
     let answeredCount = parseInt(localStorage.getItem("answeredCount") || "0");
@@ -445,6 +503,18 @@
 
     const ADMIN_NAME = "HOUSSAM"; 
     const defaultAvatar = "https://i.imgur.com/6VBx3io.png";
+
+    // بنك كلمات لعبة المحتال بالإيموجي
+    const undercoverPairs = [
+        { normal: "طماطم 🍅", spy: "بطاطس 🥔" },
+        { normal: "قهوة ☕", spy: "شاي 🫖" },
+        { normal: "كرة قدم ⚽", spy: "كرة سلة 🏀" },
+        { normal: "سفينة 🚢", spy: "غواصة 🚤" },
+        { normal: "تفاحة 🍎", spy: "برتقالة 🍊" },
+        { normal: "طائرة ✈️", spy: "مروحية 🚁" },
+        { normal: "أسد 🦁", spy: "نمر 🐅" },
+        { normal: "قمر 🌙", spy: "شمس ☀️" }
+    ];
 
     const baseRiddles = [
         { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
@@ -509,7 +579,6 @@
     window.onload = function() {
         if(playerName && playerPass) {
             if(!userCloudKey) {
-                // إعادة استرجاع الكي إذا كان ضاع من LocalStorage
                 db.ref('users').orderByChild('name').equalTo(playerName).once('value', (snapshot) => {
                     if (snapshot.exists()) {
                         snapshot.forEach((child) => {
@@ -727,7 +796,6 @@
         document.getElementById("new-avatar-url-input").value = userAvatarUrl;
     }
 
-    // ** إصلاح دالة تحديث البروفيل لضمان الحفظ المباشر والتزامن مع السيرفر **
     function updateProfileAvatarUrl() {
         let newUrl = document.getElementById("new-avatar-url-input").value.trim();
         if(!newUrl) {
@@ -735,7 +803,6 @@
             return;
         }
 
-        // التأكد من وجود مفتاح المستخدم بالسحابة قبل الحفظ
         if(!userCloudKey) {
             db.ref('users').orderByChild('name').equalTo(playerName).once('value', (snapshot) => {
                 if (snapshot.exists()) {
@@ -768,6 +835,11 @@
     function openRoomSetup() {
         hideAllScreens();
         document.getElementById("room-setup-screen").classList.remove("hidden");
+    }
+
+    function openUndercoverSetup() {
+        hideAllScreens();
+        document.getElementById("undercover-setup-screen").classList.remove("hidden");
     }
 
     function createRoom() {
@@ -815,7 +887,7 @@
                         if(isTurn) {
                             let notice = document.getElementById("turn-notice");
                             if(key === userCloudKey) {
-                                notice.innerText = "⭐ الدور دورك أنت الآن! اختر هل نفذت أو انسحبت.";
+                                notice.innerText = "⭐ الدور دورك أنت الآن! اختر إجابتك أو نفذ التحدي.";
                             } else {
                                 notice.innerText = `⏳ الدور الآن على: ${p.name}`;
                             }
@@ -836,6 +908,127 @@
             chatBox.innerHTML += `<div class="chat-msg"><b>${msg.name}:</b> ${msg.text}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         });
+    }
+
+    // دوال لعبة المحتال بالإيموجي الجماعية
+    function createUndercoverRoom() {
+        currentUndercoverRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
+        joinUndercoverRoomCode(currentUndercoverRoomCode);
+    }
+
+    function joinUndercoverRoom() {
+        const code = document.getElementById("undercover-code-input").value.trim();
+        if(!code) { alert("أدخل رمز غرفة المحتال أولاً!"); return; }
+        currentUndercoverRoomCode = code;
+        joinUndercoverRoomCode(currentUndercoverRoomCode);
+    }
+
+    function joinUndercoverRoomCode(code) {
+        hideAllScreens();
+        document.getElementById("undercover-lobby").classList.remove("hidden");
+        document.getElementById("undercover-room-info-text").innerText = `رمز غرفة المحتال: #${code}`;
+
+        const roomRef = db.ref('undercoverRooms/' + code + '/players');
+        roomRef.child(userCloudKey).set({ name: playerName, avatarUrl: userAvatarUrl });
+
+        // التأكد من تعيين زوج كلمات عشوائي لهذه الغرفة إذا لم يكن موجوداً
+        const pairRef = db.ref('undercoverRooms/' + code + '/currentPair');
+        const spyRef = db.ref('undercoverRooms/' + code + '/spyKey');
+
+        pairRef.once('value', (snap) => {
+            if (!snap.exists()) {
+                let randomPair = undercoverPairs[Math.floor(Math.random() * undercoverPairs.length)];
+                pairRef.set(randomPair);
+                roomRef.once('value', (pSnap) => {
+                    if(pSnap.exists()) {
+                        let keys = Object.keys(pSnap.val());
+                        let randomSpy = keys[Math.floor(Math.random() * keys.length)];
+                        spyRef.set(randomSpy);
+                    }
+                });
+            }
+        });
+
+        roomRef.on('value', (snapshot) => {
+            const players = snapshot.val();
+            let avatarsHtml = "";
+            let voteSelectOptions = `<option value="">اختر الشخص الذي تشك أنه المحتال...</option>`;
+            
+            if (players) {
+                Object.entries(players).forEach(([key, p]) => {
+                    let pImg = p.avatarUrl || defaultAvatar;
+                    avatarsHtml += `
+                        <div class="player-avatar-card">
+                            <img src="${pImg}" class="profile-img-tag" onerror="this.src='${defaultAvatar}'">
+                            <div class="player-name-tag">${p.name}</div>
+                        </div>
+                    `;
+                    if(key !== userCloudKey) {
+                        voteSelectOptions += `<option value="${p.name}">${p.name}</option>`;
+                    }
+                });
+                document.getElementById("undercover-players-container").innerHTML = avatarsHtml;
+                document.getElementById("vote-suspect-select").innerHTML = voteSelectOptions;
+            }
+        });
+
+        const chatRef = db.ref('undercoverRooms/' + code + '/chat');
+        chatRef.on('child_added', (snapshot) => {
+            const msg = snapshot.val();
+            const chatBox = document.getElementById("undercover-chat-box");
+            chatBox.innerHTML += `<div class="chat-msg"><b>${msg.name}:</b> ${msg.text}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
+    function revealMyUndercoverWord() {
+        const roomBase = db.ref('undercoverRooms/' + currentUndercoverRoomCode);
+        roomBase.once('value', (snapshot) => {
+            let data = snapshot.val();
+            if(!data || !data.currentPair || !data.spyKey) {
+                alert("جاري إعداد الجولة، انتظر قليلاً...");
+                return;
+            }
+
+            let roleDisplay = document.getElementById("undercover-my-role-display");
+            if(data.spyKey === userCloudKey) {
+                roleDisplay.innerHTML = `<span style="color: var(--danger); font-size: 18px;">🕵️‍♂️ أنت المحتال (Imposter)!</span><br>ليس لديك كلمة سرية، حاول مجاراة أصدقائك وكشف الكلمة دون أن يتم كشفك!`;
+            } else {
+                roleDisplay.innerHTML = `<span style="color: var(--success); font-size: 18px;">كلمتك السرية هي:</span><br><b>${data.currentPair.normal}</b>`;
+            }
+        });
+    }
+
+    function castUndercoverVote() {
+        let suspectName = document.getElementById("vote-suspect-select").value;
+        if(!suspectName) {
+            alert("المرجو اختيار شخص للتشكيك فيه أولاً!");
+            return;
+        }
+
+        const chatRef = db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/chat');
+        chatRef.push({
+            name: `🚨 تصويت من ${playerName}`,
+            text: `صوت اللاعب [ ${playerName} ] ضد اللاعب [ ${suspectName} ] باعتباره المحتال!`
+        });
+        alert(`✅ تم إرسال صوتك ضد (${suspectName}) بنجاح إلى الشات الجماعي!`);
+    }
+
+    function sendUndercoverChat() {
+        const input = document.getElementById("undercover-chat-input");
+        if(input.value.trim() === "") return;
+        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/chat').push({
+            name: `${playerName}`,
+            text: input.value.trim()
+        });
+        input.value = "";
+    }
+
+    function leaveUndercoverRoom() {
+        if(userCloudKey && currentUndercoverRoomCode) {
+            db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/players/' + userCloudKey).remove();
+        }
+        backToLobby();
     }
 
     function changeGameMode(mode) {
@@ -884,7 +1077,6 @@
             titleEl.innerText = "⚡ بنك التحديات الجريئة";
             let dareText = daresBank[index % daresBank.length];
             textEl.innerText = dareText;
-            optionsEl.optionsEl = "";
             optionsEl.innerHTML = `
                 <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('التحدي', '${dareText}', true)">نفذت التحدي بنجاح (+1 نقطة) ✅</button>
                 <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('التحدي', '${dareText}', false)">رفضت التحدي / انسحبت ❌</button>
@@ -978,7 +1170,7 @@
     }
 
     function hideAllScreens() {
-        ['login-screen', 'lobby-screen', 'profile-screen', 'room-setup-screen', 'multiplayer-lobby'].forEach(id => {
+        ['login-screen', 'lobby-screen', 'profile-screen', 'room-setup-screen', 'undercover-setup-screen', 'multiplayer-lobby', 'undercover-lobby'].forEach(id => {
             document.getElementById(id).classList.add("hidden");
         });
     }
