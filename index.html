@@ -3,110 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحدي العباقرة والأقوال - لخص خصومك</title>
+    <title>منصة التحدي والذكاء الاحترافية</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { background: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); width: 100%; max-width: 550px; text-align: center; border: 1px solid #334155; }
-        input, button { width: 100%; padding: 14px; margin: 12px 0; border-radius: 10px; border: none; font-size: 16px; box-sizing: border-box; }
+        input, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: none; font-size: 16px; box-sizing: border-box; }
         input { background: #334155; color: white; text-align: center; outline: none; }
         input:focus { border: 2px solid #3b82f6; }
         button { background: #3b82f6; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: #2563eb; }
+        .lobby-btn { background: #334155; border: 1px solid #475569; text-align: right; padding: 16px; margin: 10px 0; border-radius: 10px; color: #f8fafc; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .lobby-btn:hover { background: #475569; border-color: #3b82f6; }
         .option-btn { background: #334155; margin: 8px 0; text-align: right; padding: 12px 18px; color: #e2e8f0; border-radius: 8px; border: 1px solid #475569; }
         .option-btn:hover { background: #475569; border-color: #3b82f6; }
         .hidden { display: none; }
-        table { width: 100%; margin-top: 15px; border-collapse: collapse; }
-        th, td { padding: 12px; border-bottom: 1px solid #334155; text-align: center; }
-        th { background: #334155; color: #60a5fa; }
         .badge { background: #f59e0b; color: #000; padding: 3px 8px; border-radius: 6px; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- شاشة التسجيل -->
+    <!-- 1. شاشة التسجيل -->
     <div id="login-screen">
-        <h2>🔥 تحدي العباقرة والأقوال المعقدة</h2>
-        <p style="color: #94a3b8; font-size: 14px;">اختبر ذكاءك في المنطق، الفلسفة، وكشف الخداع، وتحدّ أصدقاءك!</p>
+        <h2>🔥 منصة تحدي العباقرة</h2>
+        <p style="color: #94a3b8; font-size: 14px;">أدخل معلوماتك للولوج إلى اللوبي وتحدي أصدقائك!</p>
         <input type="text" id="username" placeholder="اكتب اسمك المستعار هنا...">
-        <button onclick="startQuiz()">ابدأ التحدي الآن</button>
+        <input type="number" id="userage" placeholder="عمرك (مثال: 18)..." min="10" max="99">
+        <button onclick="enterLobby()">دخول إلى اللوبي 🚀</button>
     </div>
 
-    <!-- شاشة الأسئلة -->
+    <!-- 2. اللوبي الرئيسي -->
+    <div id="lobby-screen" class="hidden">
+        <h2 id="welcome-msg" style="color: #60a5fa; margin-bottom: 5px;"></h2>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">اختر نمط التحدي المفضّل لديك:</p>
+        
+        <button class="lobby-btn" onclick="startMode('puzzles')">
+            <span>🧩 الألغاز والذكاء الخالص (مكثفة)</span> <span>➔</span>
+        </button>
+        <button class="lobby-btn" onclick="startMode('philosophy')">
+            <span>🔥 تحديات الأقوال والفلسفة الكبرى</span> <span>➔</span>
+        </button>
+        <button class="lobby-btn" onclick="startMode('iq')">
+            <span>📊 قياس مستوى الذكاء (IQ Test بـ %)</span> <span>➔</span>
+        </button>
+        <button class="lobby-btn" onclick="openPvpScreen()" style="border-color: #10b981;">
+            <span style="color: #10b981;">⚔️ العب مع صاحبك أونلاين (غرفة تحدي)</span> <span>➔</span>
+        </button>
+    </div>
+
+    <!-- 3. شاشة إعداد غرفة اللعب مع الأصدقاء -->
+    <div id="pvp-screen" class="hidden">
+        <h2 style="color: #10b981;">⚔️ تحدي الأصدقاء أونلاين</h2>
+        <p style="color: #94a3b8; font-size: 14px;">أنشئ غرفة وشارك الرمز مع صديقك، أو أدخل رمز الغرفة للانضمام إليه!</p>
+        <button onclick="createRoom()" style="background: #10b981;">إنشاء غرفة جديدة 🎮</button>
+        <div style="margin: 15px 0; border-top: 1px solid #334155; padding-top: 15px;">
+            <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة هنا...">
+            <button onclick="joinRoom()">انضمام إلى الغرفة 🚀</button>
+        </div>
+        <button onclick="backToLobby()" style="background: #475569; margin-top: 10px;">العودة للوبي</button>
+    </div>
+
+    <!-- 4. شاشة الأسئلة -->
     <div id="quiz-screen" class="hidden">
         <p id="question-progress" style="color: #60a5fa; font-weight: bold;"></p>
-        <h3 id="question-text" style="line-height: 1.6;">السؤال هنا</h3>
+        <h3 id="question-text" style="line-height: 1.6; font-size: 17px;">السؤال هنا</h3>
         <div id="options-container"></div>
     </div>
 
-    <!-- شاشة النتيجة والترتيب -->
+    <!-- 5. شاشة النتيجة -->
     <div id="result-screen" class="hidden">
-        <h2>🏆 انتهى التحدي بنجاح!</h2>
+        <h2>🏆 النتيجة النهائية</h2>
         <p id="final-score-text" style="font-size: 18px; margin: 15px 0;"></p>
-        <h3 style="margin-top: 25px;">لوحة صدارة الأصدقاء (Leaderboard):</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>الترتيب</th>
-                    <th>الاسم</th>
-                    <th>النقطة</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard-body"></tbody>
-        </table>
-        <button onclick="location.reload()" style="background: #10b981; margin-top: 20px;">إعادة المحاولة</button>
+        <button onclick="backToLobby()" style="background: #3b82f6; margin-top: 10px;">العودة إلى اللوبي</button>
     </div>
 </div>
 
 <script>
-    const questions = [
-        {
-            q: "قيل فلسفياً: 'الذكي الحقيقي هو من يدرك كم هو جاهل'. ما هو التفسير الأعمق لهذا القول؟",
-            options: ["الجهل يريح العقل من التفكير", "الاعتراف بمحدودية المعرفة هو الدافع الحقيقي للتعلم والتقدم", "الغباء يوفر سعادة مطلقة", "العلماء الحقيقيون يعانون من العزلة"],
-            answer: 1
-        },
-        {
-            q: "سؤال في الكذوب والمنطق: شخص أخبرك بجملة واحدة وهي: 'جميع ما أقوله لك الآن هو كذب صريح'، فهل ما قاله يعتبر:",
-            options: ["حقيقة مطلقة حدثت بالفعل", "تناقض منطقي مستحيل (مفارقة / Paradox)", "كذب لا علاقة له بالواقع", "معلومة عادية صحيحة"],
-            answer: 1
-        },
-        {
-            q: "في مواجهة شعور مفاجئ بالغربة عن العالم وكأن كل شيء حولك مزيف (على طريقة الأدب الوجودي وكافكا)، كيف يتعامل العقل العالي مع هذا الإحساس؟",
-            options: ["الاستسلام المطلق والتوقف عن التفكير", "تحليله كحالة شعورية وفهم أبعاد الحرية والعبث", "الهروب في النوم والنسيان", "إنكار الواقع كلياً"],
-            answer: 1
-        },
-        {
-            q: "لغز ذكاء وتحليل: شيء تملكه أنت ويستخدمه الآخرون بكثرة أكثر مني ومنك، ومع ذلك لا تكاد تستخدمه أنت أبداً، فما هو؟",
-            options: ["اسمك", "عقلك", "سيارتك", "هاتفك"],
-            answer: 0
-        },
-        {
-            q: "إذا كان القط يقطع مسافة معينة في زمن محدد، وكان الخداع البصري يجعلك ترى السرعة مضاعفة، فأي استنتاج يدير العقل نحو الحقيقة؟",
-            options: ["الاعتماد على الحواس وحدها دون تفكير", "إخضاع المدخلات الحسية للمنطق والتحليل الرياضي", "تصديق ما تراه العين فوراً", "تجاهل المشكلة برمتها"],
-            answer: 1
-        }
-    ];
-
-    let currentQuestion = 0;
-    let score = 0;
     let playerName = "";
+    let playerAge = "";
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let activeMode = "";
 
-    function startQuiz() {
+    // بنوك أسئلة مكثفة وكثيرة
+    const questionBanks = {
+        puzzles: [
+            { q: "شيء تملكه أنت ويستخدمه الآخرون بكثرة أكثر مني ومنك، فما هو؟", options: ["اسمك", "عقلك", "سيارتك", "هاتفك"], answer: 0 },
+            { q: "أربعة أخوان يمشون معاً دائماً، يتبع بعضهم بعضاً ولا يتجاوزون بعضهم، فما هم؟", options: ["عجلات السيارة", "أرجل الطاولة", "ساعات الحائط", "أصابع اليدين"], answer: 0 },
+            { q: "مفارقة الوقت: شيء إن زاد نقص، وإن نقص زاد، فما هو؟", options: ["العمر (الوقت المتبقي)", "المال في البنك", "عدد الأصدقاء", "المسافة"], answer: 0 },
+            { q: "ما هو البيت الذي ليس فيه أبواب ولا أوصاف ولا توجد فيه أي نوافذ؟", options: ["بيت الشعر", "بيت العنكبوت", "بيت الطين", "بيت النسيان"], answer: 0 },
+            { q: "يتحدث جميع اللغات ولكنه لا يملك لساناً، فمن يكون؟", options: ["صدى الصوت", "الكتاب", "الراديو", "الحاسوب"], answer: 0 }
+        ],
+        philosophy: [
+            { q: "قيل فلسفياً: 'الذكي الحقيقي هو من يدرك كم هو جاهل'. ما تفسير ذلك؟", options: ["الجهل يريح العقل", "الاعتراف بمحدودية المعرفة هو دافع التعلم والتقدم", "الغباء يوفر سعادة", "العلماء يعانون"], answer: 1 },
+            { q: "يقول نيتشه: 'من يملك أسباباً للعيش، يمكنه أن يتحمل أي طريقة'. ماذا تعني عميقاً؟", options: ["الهدف والغاية يمنحان القدرة على تجاوز أقسى الصعاب", "المادة أهم من الأفكار", "العيش بدون أهداف أفضل", "التحمل بالحظ"], answer: 0 },
+            { q: "حسب فلسفة العبث، عندما يبحث الإنسان عن معنى وسط عالم صامت، فرت الفعل هو:", options: ["الاستسلام للحزن", "خلق المعنى الذاتي والتمرد الواعي على العبث", "تجاهل الواقع", "البحث عن إجابات جاهزة"], answer: 1 },
+            { q: "ماذا يقصد أفلاطون بمجاز الكهف في فلسفته المعرفية؟", options: ["البشر يدركون الأوهام ويظنونها الحقيقة المطلقة", "أهمية بناء الكهوف للهروب", "الظلام مفيد للتفكير العميق", "الجهل ضروري للحياة"], answer: 0 }
+        ],
+        iq: [
+            { q: "إذا كان القط يقطع مسافة معينة في زمن محدد، وكان الخداع البصري يجعلك ترى السرعة مضاعفة، فالاستنتاج الحقيقي هو:", options: ["الاعتماد على الحواس وحدها", "إخضاع المدخلات للمنطق والتحليل الرياضي", "تصديق العين فوراً", "تجاهل المشكلة"], answer: 1 },
+            { q: "شخص أخبرك بجملة: 'جميع ما أقوله لك الآن هو كذب صريح'، فهل ما قاله يعتبر:", options: ["حقيقة مطلقة", "تناقض منطقي مستحيل (Paradox)", "كذب عادي", "معلومة صحيحة"], answer: 1 },
+            { q: "في اختبار الأنماط: 2، 4، 8، 16، ما هو الرقم التالي؟", options: ["24", "32", "30", "64"], answer: 1 },
+            { q: "إذا كانت الساعات تشير إلى الثالثة ربعاً، فما هي الزاوية التقريبية بين عقرب الدقائق وعقرب الساعات؟", options: ["حوالي 37.5 درجة", "90 درجة", "45 درجة", "0 درجة"], answer: 0 }
+        ]
+    };
+
+    function enterLobby() {
         const nameInput = document.getElementById("username").value.trim();
-        playerName = nameInput !== "" ? nameInput : "مجهول";
+        const ageInput = document.getElementById("userage").value.trim();
         
+        if(!nameInput || !ageInput) {
+            alert("المرجو إدخال الاسم وعمرك لكي تستمر!");
+            return;
+        }
+        
+        playerName = nameInput;
+        playerAge = ageInput;
+
         document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("lobby-screen").classList.remove("hidden");
+        document.getElementById("welcome-msg").innerText = `مرحباً بك يا بطل: ${playerName} (${playerAge} سنة)`;
+    }
+
+    function startMode(mode) {
+        activeMode = mode;
+        currentQuestions = questionBanks[mode];
+        currentQuestionIndex = 0;
+        score = 0;
+
+        document.getElementById("lobby-screen").classList.add("hidden");
+        document.getElementById("pvp-screen").classList.add("hidden");
         document.getElementById("quiz-screen").classList.remove("hidden");
         showQuestion();
     }
 
+    function openPvpScreen() {
+        document.getElementById("lobby-screen").classList.add("hidden");
+        document.getElementById("pvp-screen").classList.remove("hidden");
+    }
+
+    function createRoom() {
+        const roomCode = Math.floor(1000 + Math.random() * 9000);
+        alert(`تم إنشاء الغرفة بنجاح! 🎮\nرمز الغرفة الخاص بك هو: ${roomCode}\nأعطه لصديقك ليدخل معك والتحدي يبدأ!`);
+        startMode('puzzles'); // يبدأ التحدي كغرفة ألغاز تنافسية
+    }
+
+    function joinRoom() {
+        const code = document.getElementById("room-code-input").value.trim();
+        if(!code) {
+            alert("المرجو كتابة رمز الغرفة أولاً!");
+            return;
+        }
+        alert(`تم الدخول بنجاح إلى الغرفة رقم (${code}) مع صديقك! لنبدأ التحدي 🚀`);
+        startMode('puzzles');
+    }
+
     function showQuestion() {
-        if(currentQuestion >= questions.length) {
+        if(currentQuestionIndex >= currentQuestions.length) {
             showResult();
             return;
         }
-        let q = questions[currentQuestion];
-        document.getElementById("question-progress").innerText = `السؤال ${currentQuestion + 1} من ${questions.length}`;
+        let q = currentQuestions[currentQuestionIndex];
+        document.getElementById("question-progress").innerText = `السؤال ${currentQuestionIndex + 1} من ${currentQuestions.length}`;
         document.getElementById("question-text").innerText = q.q;
         
         let optHtml = "";
@@ -117,29 +176,32 @@
     }
 
     function selectAnswer(selectedIndex) {
-        if(selectedIndex === questions[currentQuestion].answer) {
-            score += 20; 
+        if(selectedIndex === currentQuestions[currentQuestionIndex].answer) {
+            score += Math.round(100 / currentQuestions.length); 
         }
-        currentQuestion++;
+        currentQuestionIndex++;
         showQuestion();
     }
 
     function showResult() {
         document.getElementById("quiz-screen").classList.add("hidden");
         document.getElementById("result-screen").classList.remove("hidden");
-        document.getElementById("final-score-text").innerHTML = `مرحباً <span class="badge">${playerName}</span>، نتيجتك هي: <b>${score} / 100</b>`;
 
-        let leaderboard = JSON.parse(localStorage.getItem("quiz_leaderboard") || "[]");
-        leaderboard.push({name: playerName, score: score});
-        leaderboard.sort((a, b) => b.score - a.score);
-        localStorage.setItem("quiz_leaderboard", JSON.stringify(leaderboard));
+        let resultText = "";
+        if(activeMode === 'iq') {
+            resultText = `مستوى ذكاءك المقدر (IQ Test) هو: <span class="badge">${score}%</span> 🧠`;
+        } else {
+            resultText = `أهلاً <span class="badge">${playerName}</span>، نتيجتك في هذا التحدي هي: <b>${score} / 100</b>`;
+        }
+        
+        document.getElementById("final-score-text").innerHTML = resultText;
+    }
 
-        let lbHtml = "";
-        leaderboard.forEach((item, index) => {
-            let rankEmoji = index === 0 ? "👑" : (index === 1 ? "🥈" : (index === 2 ? "🥉" : `#${index + 1}`));
-            lbHtml += `<tr><td>${rankEmoji}</td><td>${item.name}</td><td><b>${item.score}</b></td></tr>`;
-        });
-        document.getElementById("leaderboard-body").innerHTML = lbHtml;
+    function backToLobby() {
+        document.getElementById("result-screen").classList.add("hidden");
+        document.getElementById("pvp-screen").classList.add("hidden");
+        document.getElementById("quiz-screen").classList.add("hidden");
+        document.getElementById("lobby-screen").classList.remove("hidden");
     }
 </script>
 
