@@ -244,6 +244,7 @@
                 <span style="color: var(--warning);">🏆 لوحة المتصدرين العامة</span> <span style="color: var(--warning);">➔</span>
             </div>
         </div>
+        <button onclick="logout()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 15px; padding: 8px;">تسجيل الخروج وحذف البيانات</button>
     </div>
 
     <!-- 3. إعداد الغرفة -->
@@ -261,16 +262,14 @@
         <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 10px;">العودة للوبي</button>
     </div>
 
-    <!-- 4. الغرفة الجماعية (بالأدوار وحساب النقاط) -->
+    <!-- 4. الغرفة الجماعية -->
     <div id="multiplayer-lobby" class="hidden">
         <div>
             <h2 style="color: var(--success); margin-bottom: 2px;">⚡ غرفة التحديات والنقاط الحية</h2>
             <p id="room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0 10px 0;"></p>
             
-            <!-- أرينا اللاعبين والنقاط الخاصة بهم -->
             <div class="players-grid" id="players-avatars-container"></div>
 
-            <!-- قائمة نمط اللعب -->
             <div style="margin: 8px 0; text-align: right;">
                 <select id="game-mode-select" onchange="changeGameMode(this.value)">
                     <option value="riddles">🧠 بنك الألغاز الذكية (تربح نقطة عند الإجابة)</option>
@@ -279,19 +278,18 @@
                 </select>
             </div>
 
-            <!-- صندوق اللعبة ودور اللاعب الحالي -->
             <div class="game-box" id="active-game-box">
                 <div id="turn-notice" class="turn-banner">جاري تحديد صاحب الدور...</div>
                 <div class="game-title" id="game-category-title">النمط النشط: الألغاز الذكية</div>
                 <div class="game-content" id="game-main-text">جاري تحميل التحدي...</div>
                 <div id="game-options-container"></div>
-                <button id="next-turn-btn" class="btn-primary hidden" style="margin-top: 10px; padding: 8px; font-size: 13px;" onclick="nextTurn()">تخطي وتمرير الدور ➡️</button>
+                <button id="next-turn-btn" class="btn-primary" style="margin-top: 10px; padding: 8px; font-size: 13px;" onclick="nextTurn()">تخطي وتمرير الدور ➡️</button>
             </div>
         </div>
 
         <div>
             <div class="chat-box" id="group-chat-box">
-                <div class="chat-msg"><b>النظام:</b> مرحباً بكم! احترموا الأدوار لكي تحسب النقاط لمن يجاوب في دوره.</div>
+                <div class="chat-msg"><b>النظام:</b> مرحباً بكم في الغرفة! استمتعوا بالمنافسة.</div>
             </div>
             
             <div class="chat-input-row">
@@ -335,11 +333,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let playerName = "";
-    let playerAge = "";
+    let playerName = localStorage.getItem("playerName") || "";
+    let playerAge = localStorage.getItem("playerAge") || "";
     let currentRoomCode = "";
-    let userKey = "";
-    let userAvatarEmoji = "😎";
+    let userKey = localStorage.getItem("userKey") || "";
+    let userAvatarEmoji = localStorage.getItem("userAvatar") || "😎";
     let myScore = 0;
 
     const riddlesBank = [
@@ -366,6 +364,15 @@
         "ما هو أكثر شيء تندم عليه في حياتك الدراسية أو الشخصية؟"
     ];
 
+    // التحقق واش مسجل مسبقاً فالمتصفح
+    window.onload = function() {
+        if(playerName) {
+            hideAllScreens();
+            document.getElementById("lobby-screen").classList.remove("hidden");
+            document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
+        }
+    };
+
     function enterPlatform() {
         const nameInput = document.getElementById("username").value.trim();
         const ageInput = document.getElementById("userage").value.trim();
@@ -378,9 +385,23 @@
         const avatars = ['😎', '🦊', '🐯', '🐼', '🤖', '👻', '🦁'];
         userAvatarEmoji = avatars[Math.floor(Math.random() * avatars.length)];
         
+        // حفظ البيانات في المتصفح باش ما تمشيش إيلا خرجتي
+        localStorage.setItem("playerName", playerName);
+        localStorage.setItem("playerAge", playerAge);
+        localStorage.setItem("userAvatar", userAvatarEmoji);
+        
         hideAllScreens();
         document.getElementById("lobby-screen").classList.remove("hidden");
         document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
+    }
+
+    function logout() {
+        localStorage.clear();
+        playerName = "";
+        playerAge = "";
+        userKey = "";
+        hideAllScreens();
+        document.getElementById("login-screen").classList.remove("hidden");
     }
 
     function openRoomSetup() {
@@ -415,14 +436,20 @@
         document.getElementById("room-info-text").innerText = `رمز الغرفة: #${code}`;
 
         const roomRef = db.ref('rooms/' + code + '/players');
-        const newUserRef = roomRef.push();
-        userKey = newUserRef.key;
+        
+        // إيلا كانت عندك مفتاح قديم فالغرفة، كنستعملوه، وإيلا ماكانش كنزيدو واحد جديد
+        let newUserRef;
+        if(!userKey) {
+            newUserRef = roomRef.push();
+            userKey = newUserRef.key;
+            localStorage.setItem("userKey", userKey);
+        } else {
+            newUserRef = roomRef.child(userKey);
+        }
+
         myScore = 0;
         newUserRef.set({ name: playerName, emoji: userAvatarEmoji, score: 0 });
 
-        newUserRef.onDisconnect().remove();
-
-        // مزامنة اللاعبين والنقاط والأدوار
         roomRef.on('value', (snapshot) => {
             const players = snapshot.val();
             let avatarsHtml = "";
@@ -448,10 +475,8 @@
                             let notice = document.getElementById("turn-notice");
                             if(key === userKey) {
                                 notice.innerText = "⭐ الدور دورك أنت الآن! أجب أو نفذ التحدي.";
-                                document.getElementById("next-turn-btn").classList.remove("hidden");
                             } else {
                                 notice.innerText = `⏳ الدور الآن على: ${p.name} (${p.emoji})`;
-                                document.getElementById("next-turn-btn").classList.add("hidden");
                             }
                         }
                     });
@@ -522,61 +547,37 @@
         }
     }
 
-    function checkIsMyTurn(callback) {
-        db.ref('rooms/' + currentRoomCode + '/players').once('value', (pSnap) => {
-            let players = pSnap.val();
-            if(!players) return;
-            let pKeys = Object.keys(players);
-            db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').once('value', (tSnap) => {
-                let tIdx = tSnap.val() || 0;
-                let activeKey = pKeys[tIdx % pKeys.length];
-                if(activeKey === userKey) {
-                    callback();
-                } else {
-                    alert("ليس دورك الآن! انتظر حتى ينتهي دور اللاعب الحالي.");
-                }
-            });
-        });
-    }
-
     function submitTurnAnswer(correctIdx, chosenIdx, chosenText) {
-        checkIsMyTurn(() => {
-            const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
-            if(chosenIdx === correctIdx) {
-                // إضافة نقطة للاعب فالحال وتحديث قاعدة البيانات
-                myScore += 1;
-                db.ref('rooms/' + currentRoomCode + '/players/' + userKey + '/score').set(myScore);
-                
-                // تحديث اللوح العام للمتصدرين أيضاً
-                updateGlobalLeaderboard(playerName, myScore);
-
-                chatRef.push({
-                    name: "🏆 إجابة صحيحة",
-                    text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أاب بـ (${chosenText}) وربح نقطة!`
-                });
-                nextTurn();
-            } else {
-                chatRef.push({
-                    name: `❌ ${playerName} ${userAvatarEmoji}`,
-                    text: `اختار إجابة خاطئة (${chosenText})، حاول مجدداً.`
-                });
-            }
-        });
-    }
-
-    function announceTurnAction(actionType, contentText) {
-        checkIsMyTurn(() => {
+        const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
+        if(chosenIdx === correctIdx) {
             myScore += 1;
             db.ref('rooms/' + currentRoomCode + '/players/' + userKey + '/score').set(myScore);
             updateGlobalLeaderboard(playerName, myScore);
 
-            const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
             chatRef.push({
-                name: "🔥 تحدي منجز",
-                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أنجز ${actionType}: (${contentText}) وربح نقطة!`
+                name: "🏆 إجابة صحيحة",
+                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أاب بـ (${chosenText}) وربح نقطة!`
             });
             nextTurn();
+        } else {
+            chatRef.push({
+                name: `❌ ${playerName} ${userAvatarEmoji}`,
+                text: `اختار إجابة خاطئة (${chosenText})، حاول مجدداً.`
+            });
+        }
+    }
+
+    function announceTurnAction(actionType, contentText) {
+        myScore += 1;
+        db.ref('rooms/' + currentRoomCode + '/players/' + userKey + '/score').set(myScore);
+        updateGlobalLeaderboard(playerName, myScore);
+
+        const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
+        chatRef.push({
+            name: "🔥 تحدي منجز",
+            text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أنجز ${actionType}: (${contentText}) وربح نقطة!`
         });
+        nextTurn();
     }
 
     function nextTurn() {
@@ -646,6 +647,7 @@
 
     function backToLobby() {
         hideAllScreens();
+        document.getElementById("lobby-screen").classList.print = "";
         document.getElementById("lobby-screen").classList.remove("hidden");
     }
 </script>
