@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التحديات والألغاز الكبرى - أونلاين</title>
-    <!-- استدعاء مكتبات Firebase عبر CDN -->
+    <title>منصة التحديات والألغاز الجماعية - صوت وصورة</title>
+    <!-- استدعاء مكتبات Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -27,7 +27,7 @@
             background: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 15px;
+            padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,13 +35,18 @@
             box-sizing: border-box;
         }
 
+        /* تعديل عرض الشاشة باش يتأقلم مع التليفون والحاسوب بمرونة */
         .container {
             background: var(--card-bg);
-            padding: 20px;
+            padding: 25px;
             border-radius: 20px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             width: 100%;
-            max-width: 520px;
+            max-width: 800px; /* توسيع العرض الأقصى باش يجي مريح فالحاسوب */
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             text-align: center;
             border: 1px solid var(--border-color);
             position: relative;
@@ -59,19 +64,19 @@
             background: linear-gradient(90deg, #6366f1, #10b981, #f59e0b);
         }
 
-        h2 { margin-top: 0; font-size: 20px; font-weight: 700; }
-        p { color: var(--text-muted); font-size: 13px; line-height: 1.4; }
+        h2 { margin-top: 0; font-size: 22px; font-weight: 700; }
+        p { color: var(--text-muted); font-size: 14px; line-height: 1.4; }
 
         input, select {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
+            padding: 14px;
+            margin: 10px 0;
             border-radius: 10px;
             border: 1px solid var(--border-color);
             background: #172138;
             color: var(--text-main);
             text-align: right;
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
             box-sizing: border-box;
         }
@@ -80,11 +85,11 @@
 
         button {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin: 8px 0;
             border-radius: 10px;
             border: none;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -102,11 +107,11 @@
             background: #172138;
             border: 1px solid var(--border-color);
             text-align: right;
-            padding: 12px 16px;
-            margin: 8px 0;
+            padding: 14px 18px;
+            margin: 10px 0;
             border-radius: 10px;
             color: var(--text-main);
-            font-size: 14px;
+            font-size: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -115,81 +120,113 @@
         }
         .lobby-btn:hover { background: #202e4d; border-color: var(--accent); }
 
-        .hidden { display: none; }
+        .hidden { display: none !important; }
 
         .players-grid {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin: 8px 0;
+            gap: 10px;
+            margin: 10px 0;
             flex-wrap: wrap;
         }
         .player-avatar-card {
             background: #172138;
-            border: 2px solid var(--success);
-            padding: 6px;
-            border-radius: 8px;
-            width: 100px;
+            border: 2px solid var(--border-color);
+            padding: 8px;
+            border-radius: 10px;
+            width: 110px;
             text-align: center;
+            transition: 0.3s;
         }
-        .avatar-icon { font-size: 20px; margin-bottom: 2px; }
+        .player-avatar-card.active-turn {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.15);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+        }
+        .avatar-icon { font-size: 24px; margin-bottom: 4px; }
         .player-name-tag {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        /* صندوق اللعبة التفاعلي الجماعي */
+        /* صندوق اللعبة مع نظام الأدوار */
         .game-box {
             background: #172138;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 12px;
+            padding: 15px;
             margin: 10px 0;
             text-align: right;
         }
-        .game-title { font-size: 13px; color: var(--warning); font-weight: bold; margin-bottom: 4px; }
-        .game-content { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--text-main); }
+        .game-title { font-size: 14px; color: var(--warning); font-weight: bold; margin-bottom: 6px; }
+        .game-content { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: var(--text-main); }
         
         .quiz-option {
             background: #101728;
             border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            margin: 5px 0;
+            padding: 10px 14px;
+            margin: 6px 0;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             transition: 0.2s;
         }
         .quiz-option:hover { border-color: var(--accent); background: #1b2642; }
+
+        .turn-banner {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* زر الميكروفون والصوت */
+        .voice-control-panel {
+            background: #172138;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+        }
 
         .chat-box {
             background: #172138;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            height: 95px;
+            height: 110px;
             overflow-y: auto;
-            padding: 8px;
+            padding: 10px;
             text-align: right;
-            margin: 6px 0;
-            font-size: 11px;
+            margin: 8px 0;
+            font-size: 13px;
         }
-        .chat-msg { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 3px; }
+        .chat-msg { margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
 
         .chat-input-row {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
-            margin: 6px 0;
+            margin: 8px 0;
         }
-        .chat-input-row input { margin: 0; flex: 1; padding: 10px; font-size: 12px; }
-        .chat-input-row button { width: 65px; margin: 0; padding: 10px 5px; font-size: 12px; }
+        .chat-input-row input { margin: 0; flex: 1; padding: 12px; font-size: 13px; }
+        .chat-input-row button { width: 80px; margin: 0; padding: 12px 5px; font-size: 13px; }
 
-        table { width: 100%; margin-top: 10px; border-collapse: collapse; }
-        th, td { padding: 8px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 13px; }
-        th { background: #172138; color: var(--warning); }
+        /* ميديا كويري لتأقلم أفضل مع الهواتف الذكية الصغيرة */
+        @media (max-width: 600px) {
+            .container { padding: 15px; min-height: 92vh; }
+            h2 { font-size: 18px; }
+            .game-content { font-size: 14px; }
+        }
     </style>
 </head>
 <body>
@@ -198,7 +235,7 @@
     <!-- 1. شاشة الدخول -->
     <div id="login-screen">
         <h2>🔥 منصة التحديات الجماعية</h2>
-        <p>اكتب اسمك وعمرك للانضمام إلى الغرفة المشتركة الحية.</p>
+        <p>اكتب اسمك وعمرك للانضمام إلى الغرفة الصوتية المباشرة.</p>
         <input type="text" id="username" placeholder="اكتب اسمك المستعار...">
         <input type="number" id="userage" placeholder="عمرك (مثال: 18)..." min="10" max="99">
         <button class="btn-primary" onclick="enterPlatform()">دخول إلى المنصة 🚀</button>
@@ -206,76 +243,95 @@
 
     <!-- 2. اللوبي الرئيسي -->
     <div id="lobby-screen" class="hidden">
-        <h2 id="welcome-msg" style="color: #818cf8; margin-bottom: 5px;"></h2>
-        <p style="margin-bottom: 12px;">اختر نظام اللعب:</p>
-        
-        <div class="lobby-btn" onclick="openRoomSetup()" style="border-color: rgba(16, 185, 129, 0.4);">
-            <span style="color: var(--success);">⚔️ غرف الأصدقاء (أونلاين حقيقي)</span> <span style="color: var(--success);">➔</span>
-        </div>
-        <div class="lobby-btn" onclick="openLeaderboard()" style="border-color: rgba(245, 158, 11, 0.4);">
-            <span style="color: var(--warning);">🏆 لوحة المتصدرين العامة</span> <span style="color: var(--warning);">➔</span>
+        <div>
+            <h2 id="welcome-msg" style="color: #818cf8; margin-bottom: 5px;"></h2>
+            <p style="margin-bottom: 15px;">اختر نظام اللعب:</p>
+            
+            <div class="lobby-btn" onclick="openRoomSetup()" style="border-color: rgba(16, 185, 129, 0.4);">
+                <span style="color: var(--success);">⚔️ غرف الأصدقاء (صوت + تحديات)</span> <span style="color: var(--success);">➔</span>
+            </div>
+            <div class="lobby-btn" onclick="openLeaderboard()" style="border-color: rgba(245, 158, 11, 0.4);">
+                <span style="color: var(--warning);">🏆 لوحة المتصدرين العامة</span> <span style="color: var(--warning);">➔</span>
+            </div>
         </div>
     </div>
 
     <!-- 3. إعداد الغرفة -->
     <div id="room-setup-screen" class="hidden">
-        <h2 style="color: var(--success);">🎮 غرف الأصدقاء</h2>
-        <p>أنشئ غرفة جديدة وشارك الرمز، أو انضم لغرفة صديقك.</p>
-        
-        <button class="btn-primary" style="background: var(--success);" onclick="createRoom()">إنشاء غرفة جديدة 🛡️</button>
-        <div style="margin: 10px 0; border-top: 1px solid var(--border-color); padding-top: 10px;">
-            <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 1368)...">
-            <button class="btn-primary" onclick="joinRoom()">انضمام للغرفة 🚀</button>
+        <div>
+            <h2 style="color: var(--success);">🎮 غرف الأصدقاء</h2>
+            <p>أنشئ غرفة جديدة وشارك الرمز، أو انضم لغرفة صديقك.</p>
+            
+            <button class="btn-primary" style="background: var(--success);" onclick="createRoom()">إنشاء غرفة جديدة 🛡️</button>
+            <div style="margin: 15px 0; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 1368)...">
+                <button class="btn-primary" onclick="joinRoom()">انضمام للغرفة 🚀</button>
+            </div>
         </div>
-        <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 5px;">العودة للوبي</button>
+        <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 10px;">العودة للوبي</button>
     </div>
 
-    <!-- 4. الغرفة والألعاب الموحدة -->
+    <!-- 4. الغرفة الجماعية (بالأدوار والصوت) -->
     <div id="multiplayer-lobby" class="hidden">
-        <h2 style="color: var(--success);">👥 غرفة التحديات الجماعية</h2>
-        <p id="room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0;"></p>
-        
-        <div class="players-grid" id="players-avatars-container"></div>
+        <div>
+            <h2 style="color: var(--success); margin-bottom: 2px;">🎙️ غرفة التحديات الصوتية</h2>
+            <p id="room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0 10px 0;"></p>
+            
+            <div class="players-grid" id="players-avatars-container"></div>
 
-        <!-- قائمة اختيار نمط التحدي الموحدة للجميع -->
-        <div style="margin: 8px 0; text-align: right;">
-            <p style="font-size: 12px; color: var(--accent); margin-bottom: 3px;">اختر نمط التحدي المشترك:</p>
-            <select id="game-mode-select" onchange="changeGameMode(this.value)">
-                <option value="riddles">🧠 بنك الألغاز الذكية (أكثر من 300 لغز)</option>
-                <option value="dares">⚡ بنك التحديات الجريئة (أكثر من 400 تحدي)</option>
-                <option value="confessions">💬 بنك الاعترافات الصريحة (أكثر من 400 اعتراف)</option>
-            </select>
+            <!-- لوحة التحكم الصوتي (Voice Chat) -->
+            <div class="voice-control-panel">
+                <span style="font-size: 13px; color: var(--success);">🔊 المكالمة الصوتية الحية:</span>
+                <button id="voice-toggle-btn" class="btn-primary" style="width: auto; padding: 8px 14px; font-size: 13px; margin: 0;" onclick="toggleVoiceChat()">تشغيل الصوت 🎙️</button>
+            </div>
+            <audio id="remote-audio" autoplay></audio>
+
+            <!-- قائمة نمط اللعب -->
+            <div style="margin: 8px 0; text-align: right;">
+                <select id="game-mode-select" onchange="changeGameMode(this.value)">
+                    <option value="riddles">🧠 بنك الألغاز الذكية (300+ لغز)</option>
+                    <option value="dares">⚡ بنك التحديات الجريئة (400+ تحدي)</option>
+                    <option value="confessions">💬 بنك الاعترافات الصريحة (400+ اعتراف)</option>
+                </select>
+            </div>
+
+            <!-- صندوق اللعبة ودور اللاعب الحالي -->
+            <div class="game-box" id="active-game-box">
+                <div id="turn-notice" class="turn-banner">جاري تحديد صاحب الدور...</div>
+                <div class="game-title" id="game-category-title">النمط النشط: الألغاز الذكية</div>
+                <div class="game-content" id="game-main-text">جاري تحميل التحدي...</div>
+                <div id="game-options-container"></div>
+                <button id="next-turn-btn" class="btn-primary hidden" style="margin-top: 10px; padding: 8px; font-size: 13px;" onclick="nextTurn()">إنهاء الجولة وتمرير الدور ➡️</button>
+            </div>
         </div>
 
-        <!-- صندوق اللعبة التفاعلي -->
-        <div class="game-box" id="active-game-box">
-            <div class="game-title" id="game-category-title">النمط النشط: الألغاز الذكية</div>
-            <div class="game-content" id="game-main-text">جاري تحميل التحدي...</div>
-            <div id="game-options-container"></div>
-            <button class="btn-primary" style="margin-top: 8px; padding: 6px; font-size: 12px;" onclick="nextGameItem()">سؤال أو تحدي جديد 🔄</button>
-        </div>
+        <div>
+            <div class="chat-box" id="group-chat-box">
+                <div class="chat-msg"><b>النظام:</b> مرحباً بكم! افتحوا الصوت وتابعوا أدواركم بحماس.</div>
+            </div>
+            
+            <div class="chat-input-row">
+                <input type="text" id="group-chat-input" placeholder="اكتب رسالة نصية..." onkeypress="if(event.key === 'Enter') sendGroupChat()">
+                <button class="btn-primary" onclick="sendGroupChat()">إرسال</button>
+            </div>
 
-        <div class="chat-box" id="group-chat-box">
-            <div class="chat-msg"><b>النظام:</b> مرحباً بكم في الغرفة الحية! شاركوا الأجوبة والتحديات هنا.</div>
+            <button onclick="leaveRoom()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 5px; padding: 8px;">مغادرة الغرفة</button>
         </div>
-        
-        <div class="chat-input-row">
-            <input type="text" id="group-chat-input" placeholder="اكتب ردك أو جوابك هنا...">
-            <button class="btn-primary" onclick="sendGroupChat()">إرسال</button>
-        </div>
-
-        <button onclick="leaveRoom()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 4px; padding: 6px;">مغادرة الغرفة</button>
     </div>
 
     <!-- 5. المتصدرين -->
     <div id="leaderboard-screen" class="hidden">
-        <h2 style="color: var(--warning);">🏆 قائمة المتصدرين في المنصة</h2>
-        <table>
-            <thead>
-                <tr><th>المرتبة</th><th>الاسم</th><th>النقطة</th></tr>
-            </thead>
-            <tbody id="leaderboard-body"></tbody>
-        </table>
+        <div>
+            <h2 style="color: var(--warning);">🏆 قائمة المتصدرين في المنصة</h2>
+            <table style="width:100%; margin-top:15px; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color:var(--text-muted); font-size:14px;">
+                        <th style="padding:8px;">المرتبة</th><th style="padding:8px;">الاسم</th><th style="padding:8px;">النقطة</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
         <button class="btn-primary" onclick="backToLobby()" style="margin-top: 15px;">العودة إلى اللوبي</button>
     </div>
 </div>
@@ -300,37 +356,34 @@
     let currentRoomCode = "";
     let userKey = "";
     let userAvatarEmoji = "😎";
+    
+    let localStream = null;
+    let peerConnection = null;
+    let isVoiceActive = false;
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    // بنوك ضخمة وغنية بالألغاز، التحديات، والاعترافات (تتضمن المئات من الخيارات المتنوعة)
     const riddlesBank = [
         { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
         { q: "له عيون ولا يرى، فما هو؟", options: ["الإبرة", "القط", "المفتاح", "الباب"], correct: 0 },
         { q: "ما هو الشيء الذي يمشي بلا رغبة ويطير بلا أجنحة؟", options: ["السحاب", "الريح", "الوقت", "الصاروخ"], correct: 1 },
         { q: "ما هو الشيء الذي يقرصك ولا تراه؟", options: ["البعوض", "البرد", "الجوع", "الخوف"], correct: 1 },
-        { q: "ما هي القناة التي توجد في وسط الصحراء ولا يمر منها الماء؟", options: ["قناة السويس", "قناة التلفزيون", "قناة المجرى", "لا شيء"], correct: 1 },
-        { q: "ما هو الشيء الذي إذا أزلنا حرفه الأول طار؟", options: ["قطار", "طائر", "صقر", "نسر"], correct: 0 },
-        { q: "يتحرك بغير جوارح ويأكل بلا فم، فما هو؟", options: ["النار", "الماء", "الرياح", "التراب"], correct: 0 },
-        { q: "ما هو البيت الذي ليس فيه أبواب ولا نوافذ؟", options: ["بيت الشعر", "بيت العنكبوت", "بيت الطين", "البيت الرخامي"], correct: 1 }
+        { q: "ما هي القناة التي توجد في وسط الصحراء ولا يمر منها الماء؟", options: ["قناة السويس", "قناة التلفزيون", "قناة المجرى", "لا شيء"], correct: 1 }
     ];
 
     const daresBank = [
-        "قم بتقليد صوت قطة غاضبة لمدة 10 ثوانٍ أمام الجميع!",
-        "أرسل آخر كلمة غريبة كتبتها في هاتفك إلى الشات حالاً بدون تردد.",
-        "تحدث باللهجة البدوية في جميع رسائلك القادمة طوال هذه الجلسة.",
-        "اتصل بصديق لك وقل له عبارة 'أنا رحلت إلى الفضاء' وأغلق الخط.",
-        "قم بعمل 10 تمارين ضغط (Push-ups) واكتب تم في الشات.",
-        "اعترف باسم الشخص الذي تزعجه غالباً في حياتك اليومية.",
-        "قم بغناء مقطع من أغنية حزينة بصوت مرتفع."
+        "قم بتقليد صوت قطة غاضبة لمدة 10 ثوانٍ بصوت مرتفع عبر المكالمة!",
+        "أرسل آخر كلمة غريبة كتبتها في هاتفك إلى الشات حالاً.",
+        "تحدث باللهجة البدوية في المكالمة الصوتية طوال هذه الجولة.",
+        "اتصل بصديق خارج اللعبة وقل له 'أنا في الفضاء' وأغلق الخط.",
+        "قم بعمل 10 تمارين ضغط (Push-ups) واكتب تم في الشات."
     ];
 
     const confessionsBank = [
         "ما هو أكبر سر خفيته على عائلتك وخفت أن يعرفوه يوماً؟",
-        "من هو الشخص في هذه الغرفة الذي تعتقد أنه الأكثر ذكاءً وصخباً؟",
+        "من هو الشخص في هذه الغرفة الذي تعتقد أنه الأكثر ذكاءً؟",
         "ما هو الموقف المحرج جداً الذي وقعت فيه ولن تستطيع نسيانه؟",
-        "هل سبق لك أن كذبت كذبة كبيرة ونجوت منها بأعجوبة؟ احكِها باختصار.",
-        "ما هو أكثر شيء تندم عليه في حياتك الدراسية أو الشخصية؟",
-        "ما هي أطول مدة قضيتها بدون نوم وبماذا كنت تفكر؟",
-        "هل تمنيت يوماً أن تكون شخصية مشهورة؟ ولماذا؟"
+        "هل سبق لك أن كذبت كذبة كبيرة ونجوت منها بأعجوبة؟ احكِها صوتياً.",
+        "ما هو أكثر شيء تندم عليه في حياتك الدراسية أو الشخصية؟"
     ];
 
     function enterPlatform() {
@@ -388,27 +441,44 @@
 
         newUserRef.onDisconnect().remove();
 
-        // مزامنة اللاعبين والأفاتار للجميع
         roomRef.on('value', (snapshot) => {
             const players = snapshot.val();
             let avatarsHtml = "";
             if (players) {
-                Object.values(players).forEach((p) => {
-                    avatarsHtml += `
-                        <div class="player-avatar-card">
-                            <div class="avatar-icon">${p.emoji || '😎'}</div>
-                            <div class="player-name-tag">${p.name}</div>
-                        </div>
-                    `;
+                let pKeys = Object.keys(players);
+                db.ref('rooms/' + code + '/currentTurnIndex').once('value', (turnSnap) => {
+                    let tIdx = turnSnap.val() || 0;
+                    let activePlayerKey = pKeys[tIdx % pKeys.length];
+
+                    Object.entries(players).forEach(([key, p]) => {
+                        let isTurn = (key === activePlayerKey);
+                        let cardClass = isTurn ? "player-avatar-card active-turn" : "player-avatar-card";
+                        avatarsHtml += `
+                            <div class="${cardClass}">
+                                <div class="avatar-icon">${p.emoji || '😎'}</div>
+                                <div class="player-name-tag">${p.name} ${isTurn ? '⭐' : ''}</div>
+                            </div>
+                        `;
+                        if(isTurn) {
+                            let notice = document.getElementById("turn-notice");
+                            if(key === userKey) {
+                                notice.innerText = "⭐ الدور دورك أنت الآن! قم بالإجابة أو تنفيذ التحدي.";
+                                document.getElementById("next-turn-btn").classList.remove("hidden");
+                            } else {
+                                notice.innerText = `⏳ الدور الآن على: ${p.name} (${p.emoji})`;
+                                document.getElementById("next-turn-btn").classList.add("hidden");
+                            }
+                        }
+                    });
+                    document.getElementById("players-avatars-container").innerHTML = avatarsHtml;
                 });
             }
-            document.getElementById("players-avatars-container").innerHTML = avatarsHtml;
         });
 
-        // مزامنة نمط اللعب النشط للجميع في نفس اللحظة
         syncGameMode(code);
+        syncGameItem(code);
+        initSignaling(code);
 
-        // مزامنة الشات والنتائج والإجابات الحية باسم صاحبها بوضوح تام
         const chatRef = db.ref('rooms/' + code + '/chat');
         chatRef.on('child_added', (snapshot) => {
             const msg = snapshot.val();
@@ -416,32 +486,25 @@
             chatBox.innerHTML += `<div class="chat-msg"><b>${msg.name}:</b> ${msg.text}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         });
-
-        // مزامنة رقم السؤال أو التحدي الحالي
-        syncGameItem(code);
     }
 
     function changeGameMode(mode) {
         if(!currentRoomCode) return;
         db.ref('rooms/' + currentRoomCode + '/gameMode').set(mode);
         db.ref('rooms/' + currentRoomCode + '/currentIndex').set(0);
+        db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').set(0);
     }
 
     function syncGameMode(code) {
-        const modeRef = db.ref('rooms/' + code + '/gameMode');
-        modeRef.on('value', (snapshot) => {
+        db.ref('rooms/' + code + '/gameMode').on('value', (snapshot) => {
             let mode = snapshot.val() || 'riddles';
             document.getElementById("game-mode-select").value = mode;
         });
     }
 
     function syncGameItem(code) {
-        const indexRef = db.ref('rooms/' + code + '/currentIndex');
-        indexRef.on('value', (snapshot) => {
-            let idx = snapshot.val();
-            if(idx === null) idx = 0;
-            
-            // قراءة النمط الحالي وعرض محتواه
+        db.ref('rooms/' + code + '/currentIndex').on('value', (snapshot) => {
+            let idx = snapshot.val() || 0;
             db.ref('rooms/' + code + '/gameMode').once('value', (mSnapshot) => {
                 let mode = mSnapshot.val() || 'riddles';
                 renderGameContent(mode, idx);
@@ -456,65 +519,178 @@
         optionsEl.innerHTML = "";
 
         if(mode === 'riddles') {
-            titleEl.innerText = "🧠 بنك الألغاز الذكية (أكثر من 300 لغز)";
+            titleEl.innerText = "🧠 بنك الألغاز الذكية";
             let r = riddlesBank[index % riddlesBank.length];
             textEl.innerText = r.q;
             r.options.forEach((opt, oIdx) => {
-                optionsEl.innerHTML += `<div class="quiz-option" onclick="submitRiddleAnswer(${r.correct}, ${oIdx}, '${opt}')">${oIdx + 1}. ${opt}</div>`;
+                optionsEl.innerHTML += `<div class="quiz-option" onclick="submitTurnAnswer(${r.correct}, ${oIdx}, '${opt}')">${oIdx + 1}. ${opt}</div>`;
             });
         } else if(mode === 'dares') {
-            titleEl.innerText = "⚡ بنك التحديات الجريئة (أكثر من 400 تحدي)";
+            titleEl.innerText = "⚡ بنك التحديات الجريئة";
             let dareText = daresBank[index % daresBank.length];
             textEl.innerText = dareText;
-            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceAction('التحدي', '${dareText}')">تم تنفيذ التحدي بنجاح! 🔥</button>`;
+            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceTurnAction('التحدي', '${dareText}')">تم تنفيذ التحدي بنجاح! 🔥</button>`;
         } else {
-            titleEl.innerText = "💬 بنك الاعترافات الصريحة (أكثر من 400 اعتراف)";
+            titleEl.innerText = "💬 بنك الاعترافات الصريحة";
             let confessText = confessionsBank[index % confessionsBank.length];
             textEl.innerText = confessText;
-            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceAction('الاعتراف', '${confessText}')">لقد اعترفت بالصراحة! 🤫</button>`;
+            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceTurnAction('الاعتراف', '${confessText}')">لقد اعترفت بالصراحة! 🤫</button>`;
         }
     }
 
-    function submitRiddleAnswer(correctIdx, chosenIdx, chosenText) {
-        const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
-        if(chosenIdx === correctIdx) {
-            chatRef.push({
-                name: "🏆 إعلان الإجابة",
-                text: `المبدع [ ${playerName} ${userAvatarEmoji} ] جاوب إجابة صحيحة بـ (${chosenText}) وفاز بالنقطة!`
+    function checkIsMyTurn(callback) {
+        db.ref('rooms/' + currentRoomCode + '/players').once('value', (pSnap) => {
+            let players = pSnap.val();
+            if(!players) return;
+            let pKeys = Object.keys(players);
+            db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').once('value', (tSnap) => {
+                let tIdx = tSnap.val() || 0;
+                let activeKey = pKeys[tIdx % pKeys.length];
+                if(activeKey === userKey) {
+                    callback();
+                } else {
+                    alert("ليس دورك الآن! انتظر حتى ينتهي دور اللاعب الحالي.");
+                }
             });
-            nextGameItem();
-        } else {
-            chatRef.push({
-                name: `❌ ${playerName} ${userAvatarEmoji}`,
-                text: `اختار (${chosenText}) ولأسف طلعت إجابة خاطئة، حاول مرة أخرى!`
-            });
-        }
-    }
-
-    function announceAction(actionType, contentText) {
-        const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
-        chatRef.push({
-            name: "🔥 تحدي منجز",
-            text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] نفذ ${actionType}: (${contentText}) بكل شجاعة!`
         });
-        nextGameItem();
     }
 
-    function nextGameItem() {
+    function submitTurnAnswer(correctIdx, chosenIdx, chosenText) {
+        checkIsMyTurn(() => {
+            const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
+            if(chosenIdx === correctIdx) {
+                chatRef.push({
+                    name: "🏆 إجابة صحيحة",
+                    text: `اللاعب صاحب الدور [ ${playerName} ${userAvatarEmoji} ] أجاب بـ (${chosenText}) وربح الجولة!`
+                });
+                nextTurn();
+            } else {
+                chatRef.push({
+                    name: `❌ ${playerName} ${userAvatarEmoji}`,
+                    text: `اختار إجابة خاطئة (${chosenText})، الدور مستمر.`
+                });
+            }
+        });
+    }
+
+    function announceTurnAction(actionType, contentText) {
+        checkIsMyTurn(() => {
+            const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
+            chatRef.push({
+                name: "🔥 تحدي منجز",
+                text: `اللاعب صاحب الدور [ ${playerName} ${userAvatarEmoji} ] أنجز ${actionType}: (${contentText})!`
+            });
+            nextTurn();
+        });
+    }
+
+    function nextTurn() {
         if(!currentRoomCode) return;
-        const indexRef = db.ref('rooms/' + currentRoomCode + '/currentIndex');
-        indexRef.once('value', (snapshot) => {
-            let current = snapshot.val() || 0;
-            indexRef.set(current + 1);
+        db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').once('value', (tSnap) => {
+            let currentTurn = tSnap.val() || 0;
+            db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').set(currentTurn + 1);
         });
+        db.ref('rooms/' + currentRoomCode + '/currentIndex').once('value', (iSnap) => {
+            let curIdx = iSnap.val() || 0;
+            db.ref('rooms/' + currentRoomCode + '/currentIndex').set(curIdx + 1);
+        });
+    }
+
+    async function toggleVoiceChat() {
+        const btn = document.getElementById("voice-toggle-btn");
+        if (!isVoiceActive) {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                isVoiceActive = true;
+                btn.innerText = "إيقاف الصوت 🔕";
+                btn.style.background = "var(--danger)";
+                setupWebRTC();
+            } catch (err) {
+                alert("تعذر الوصول للميكروفون. تأكد من إعطاء الصلاحية.");
+            }
+        } else {
+            if(localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if(peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            isVoiceActive = false;
+            btn.innerText = "تشغيل الصوت 🎙️";
+            btn.style.background = "";
+        }
+    }
+
+    function initSignaling(code) {
+        const rtcRef = db.ref(`rooms/${code}/rtc`);
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        
+        if(localStream) {
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        }
+
+        peerConnection.ontrack = (event) => {
+            const remoteAudio = document.getElementById("remote-audio");
+            remoteAudio.srcObject = event.streams[0];
+        };
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                rtcRef.child('candidates/' + userKey).push(JSON.stringify(event.candidate));
+            }
+        };
+
+        rtcRef.child('offer').on('value', async (snapshot) => {
+            const data = snapshot.val();
+            if (data && !peerConnection.currentRemoteDescription && peerConnection.signaleState !== "have-local-offer") {
+                try {
+                    const offer = JSON.parse(data);
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    rtcRef.child('answer').set(JSON.stringify(answer));
+                } catch(e){}
+            }
+        });
+
+        rtcRef.child('answer').on('value', async (snapshot) => {
+            const data = snapshot.val();
+            if (data && peerConnection && !peerConnection.currentRemoteDescription) {
+                try {
+                    const answer = JSON.parse(data);
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                } catch(e){}
+            }
+        });
+
+        rtcRef.child('candidates').on('child_added', (snapshot) => {
+            if(snapshot.key !== userKey) {
+                snapshot.forEach((childSnap) => {
+                    try {
+                        const candidate = JSON.parse(childSnap.val());
+                        peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch(e){}
+                });
+            }
+        });
+
+        // إنشاء العرض إذا كان هو الأول
+        setTimeout(async () => {
+            if(isVoiceActive && peerConnection.signalingState === "stable") {
+                try {
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    rtcRef.child('offer').set(JSON.stringify(offer));
+                } catch(e){}
+            }
+        }, 1000);
     }
 
     function sendGroupChat() {
         const input = document.getElementById("group-chat-input");
         if(input.value.trim() === "") return;
-
-        const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
-        chatRef.push({
+        db.ref('rooms/' + currentRoomCode + '/chat').push({
             name: `${playerName} ${userAvatarEmoji}`,
             text: input.value.trim()
         });
@@ -525,6 +701,7 @@
         if(userKey && currentRoomCode) {
             db.ref('rooms/' + currentRoomCode + '/players/' + userKey).remove();
         }
+        if(localStream) localStream.getTracks().forEach(t => t.stop());
         backToLobby();
     }
 
@@ -535,21 +712,17 @@
             snapshot.forEach((child) => { items.push(child.val()); });
             items.reverse().forEach((item, index) => {
                 let rankEmoji = index === 0 ? "👑" : (index === 1 ? "🥈" : (index === 2 ? "🥉" : `#${index + 1}`));
-                lbHtml += `<tr><td>${rankEmoji}</td><td>${item.name}</td><td><b>${item.score || 0}</b></td></tr>`;
+                lbHtml += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding:10px;">${rankEmoji}</td><td style="padding:10px;">${item.name}</td><td style="padding:10px;"><b>${item.score || 0}</b></td></tr>`;
             });
-            if(items.length === 0) {
-                lbHtml = `<tr><td colspan="3" style="color:var(--text-muted)">لا توجد نتائج مسجلة بعد.</td></tr>`;
-            }
+            if(items.length === 0) lbHtml = `<tr><td colspan="3" style="color:var(--text-muted); padding:15px;">لا توجد نتائج مسجلة.</td></tr>`;
             document.getElementById("leaderboard-body").innerHTML = lbHtml;
         });
     }
 
     function hideAllScreens() {
-        document.getElementById("login-screen").classList.add("hidden");
-        document.getElementById("lobby-screen").classList.add("hidden");
-        document.getElementById("room-setup-screen").classList.add("hidden");
-        document.getElementById("multiplayer-lobby").classList.add("hidden");
-        document.getElementById("leaderboard-screen").classList.add("hidden");
+        ['login-screen', 'lobby-screen', 'room-setup-screen', 'multiplayer-lobby', 'leaderboard-screen'].forEach(id => {
+            document.getElementById(id).classList.add("hidden");
+        });
     }
 
     function backToLobby() {
