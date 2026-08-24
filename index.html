@@ -93,11 +93,8 @@
 
     function startQuiz() {
         const nameInput = document.getElementById("username").value.trim();
-        if(!nameInput) {
-            alert("المرجو إدخال اسمك المستعار أولاً!");
-            return;
-        }
-        playerName = nameInput;
+        playerName = nameInput !== "" ? nameInput : "مجهول";
+        
         document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("quiz-screen").classList.remove("hidden");
         showQuestion();
