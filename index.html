@@ -309,7 +309,7 @@
                 <span style="color: var(--success);">⚔️ غرف الأصدقاء (تحديات ونقاط)</span> <span style="color: var(--success);">➔</span>
             </div>
             <div class="lobby-btn" onclick="openUndercoverSetup()" style="border-color: rgba(245, 158, 11, 0.4);">
-                <span style="color: var(--warning);">🕵️‍♂️ لعبة المحتال بالإيموجي (السرية والتصويت)</span> <span style="color: var(--warning);">➔</span>
+                <span style="color: var(--warning);">🕵️‍♂️ لعبة المحتال بالإيموجي (السرية والتصويت والوقت)</span> <span style="color: var(--warning);">➔</span>
             </div>
 
             <!-- لوحة تحكم الآدمن الخاصة -->
@@ -387,8 +387,11 @@
     <div id="undercover-setup-screen" class="hidden">
         <div>
             <h2 style="color: var(--warning);">🕵️‍♂️ غرفة لعبة المحتال بالإيموجي</h2>
-            <p>انضم لغرفة أصدقائك بوضع الكود الخاص بالغرفة للعب جماعياً وكشف المحتال.</p>
+            <p>حدد مدة وقت النقاش بالثواني (خاص بالآدمن منشيء الغرفة)، ثم أنشئ الغرفة أو انضم برمزها.</p>
             
+            <div style="text-align: right; margin-bottom: 5px; font-size: 13px; color: var(--warning);">مدة النقاش المسموحة قبل فتح التصويت (بالثواني):</div>
+            <input type="number" id="room-timer-setting" value="60" placeholder="مثال: 60 ثانية" style="font-size: 14px;">
+
             <button class="btn-primary" style="background: var(--warning); color: #070913;" onclick="createUndercoverRoom()">إنشاء غرفة محتال جديدة 🕵️‍♂️</button>
             <div style="margin: 15px 0; border-top: 1px solid var(--border-color); padding-top: 15px;">
                 <input type="text" id="undercover-code-input" placeholder="أدخل رمز غرفة المحتال (مثال: 4521)...">
@@ -439,8 +442,9 @@
     <!-- 7. غرفة لعبة المحتال بالإيموجي التفاعلية -->
     <div id="undercover-lobby" class="hidden">
         <div>
-            <h2 style="color: var(--warning); margin-bottom: 2px;">🕵️‍♂️ صالون المحتال والإيموجي الحّي</h2>
-            <p id="undercover-room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0 10px 0;"></p>
+            <h2 style="color: var(--warning); margin-bottom: 2px;">🕵️‍♂️ صالون المحتال والإيموجي الشامل</h2>
+            <p id="undercover-room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0 5px 0;"></p>
+            <div id="voting-timer-banner" style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); padding: 6px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 8px;">⏳ عداد الوقت: جاري حساب انتهاء النقاش...</div>
             
             <div class="players-grid" id="undercover-players-container"></div>
 
@@ -450,18 +454,18 @@
                 <button class="btn-primary" style="background: var(--warning); color: #070913; margin-bottom: 10px;" onclick="revealMyUndercoverWord()">اضغط مطولاً / أكشف دوري سراً 👁️</button>
                 
                 <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;">
-                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;">🗳️ مرحلة التصويت على المحتال:</div>
-                    <select id="vote-suspect-select">
-                        <option value="">اختر الشخص الذي تشك أنه المحتال...</option>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;" id="voting-status-label">🗳️ مرحلة التصويت مقفلة حتى ينتهي الوقت:</div>
+                    <select id="vote-suspect-select" disabled>
+                        <option value="">التصويت مقفل مؤقتاً...</option>
                     </select>
-                    <button class="btn-primary" style="background: var(--danger); padding: 10px; font-size: 13px;" onclick="castUndercoverVote()">تثبيت التصويت ضده 🚨</button>
+                    <button id="cast-vote-btn" class="btn-primary" style="background: var(--border-color); color: var(--text-muted); padding: 10px; font-size: 13px; cursor: not-allowed;" onclick="castUndercoverVote()" disabled>تثبيت التصويت ضده 🚨</button>
                 </div>
             </div>
         </div>
 
         <div>
             <div class="chat-box" id="undercover-chat-box">
-                <div class="chat-msg"><b>النظام:</b> مرحباً بكم في لعبة المحتال! تحدثوا بحذر واكتشفوا من هو المحتال بالإيموجي.</div>
+                <div class="chat-msg"><b>النظام:</b> مرحباً بكم في لعبة المحتال الشاملة (خضر، حيوانات، ورود، وأشياء)! ناقشوا بحذر.</div>
             </div>
             
             <div class="chat-input-row">
@@ -500,20 +504,53 @@
     let myScore = parseInt(localStorage.getItem("myScore") || "0");
     let answeredCount = parseInt(localStorage.getItem("answeredCount") || "0");
     let myCustomId = localStorage.getItem("myId") || "";
+    let votingInterval = null;
 
     const ADMIN_NAME = "HOUSSAM"; 
     const defaultAvatar = "https://i.imgur.com/6VBx3io.png";
 
-    // بنك كلمات لعبة المحتال بالإيموجي
+    // بنك شامل وضخم يضم جميع الخضر، الحيوانات، الورود، والأشياء مع إيموجيها بدقة عالية
     const undercoverPairs = [
+        // الخضر (Vegetables)
         { normal: "طماطم 🍅", spy: "بطاطس 🥔" },
-        { normal: "قهوة ☕", spy: "شاي 🫖" },
-        { normal: "كرة قدم ⚽", spy: "كرة سلة 🏀" },
-        { normal: "سفينة 🚢", spy: "غواصة 🚤" },
-        { normal: "تفاحة 🍎", spy: "برتقالة 🍊" },
-        { normal: "طائرة ✈️", spy: "مروحية 🚁" },
+        { normal: "خيار 🥒", spy: "جزر 🥕" },
+        { normal: "بصل 🧅", spy: "ثوم 🧄" },
+        { normal: "خس 🥬", spy: "سبانخ 🍃" },
+        { normal: "فلفل 🌶️", spy: "باذنجان 🍆" },
+        { normal: "قرع 🎃", spy: "لفت 🟢" },
+        { normal: "ذرة 🌽", spy: "بازلاء 🟢" },
+        
+        // الحيوانات (Animals)
         { normal: "أسد 🦁", spy: "نمر 🐅" },
-        { normal: "قمر 🌙", spy: "شمس ☀️" }
+        { normal: "قرد 🐒", spy: "شمبانزي 🦍" },
+        { normal: "فيل 🐘", spy: "حافور 🦏" },
+        { normal: "قطة 🐱", spy: "كلب 🐶" },
+        { normal: "أرنب 🐰", spy: "فأر 🐭" },
+        { normal: "بقرة 🐮", spy: "خروف 🐑" },
+        { normal: "حصان 🐴", spy: "حمار 🫏" },
+        { normal: "دجاجة 🐔", spy: "بطة 🦆" },
+        { normal: "ثعلب 🦊", spy: "ذئب 🐺" },
+        { normal: "بطريق 🐧", spy: "بجعة 🦢" },
+
+        // الورود والزهور (Flowers)
+        { normal: "وردة حمراء 🌹", spy: "توليب 🌷" },
+        { normal: "أقحوان 🌼", spy: "عباد الشمس 🌻" },
+        { normal: "نرجس 💮", spy: "لبلاب 🌸" },
+        { normal: "فل 🌺", spy: "ياسمين 💮" },
+
+        // جميع الأشياء المتنوعة والأشياء اليومية (Objects & Items)
+        { normal: "هاتف 📱", spy: "حاسوب 💻" },
+        { normal: "ساعة ⌚", spy: "منبه ⏰" },
+        { normal: "مفتاح 🔑", spy: "قفل 🔒" },
+        { normal: "كرسي 🪑", spy: "طاولة 🪵" },
+        { normal: "قلم 🖊️", spy: "دفتر 📓" },
+        { normal: "سيارة 🚗", spy: "دراجة 🚲" },
+        { normal: "مصباح 💡", spy: "شمعة 🕯️" },
+        { normal: "نظارة 👓", spy: "قبعة 🧢" },
+        { normal: "حذاء 👟", spy: "حقيبة 🎒" },
+        { normal: "مقص ✂️", spy: "مشط 梳" },
+        { normal: "تلفاز 📺", spy: "راديو 📻" },
+        { normal: "سرير 🛏️", spy: "وسادة 枕" }
     ];
 
     const baseRiddles = [
@@ -857,7 +894,7 @@
     function joinRoomCode(code) {
         hideAllScreens();
         document.getElementById("multiplayer-lobby").classList.remove("hidden");
-        document.getElementById("room-info-text").innerText = `رمز الغرفة: #${code}`;
+        document.getElementById("room-info-text", ).innerText = `رمز الغرفة: #${code}`;
 
         const roomRef = db.ref('rooms/' + code + '/players');
         roomRef.child(userCloudKey).set({ name: playerName, avatarUrl: userAvatarUrl, score: myScore });
@@ -910,9 +947,16 @@
         });
     }
 
-    // دوال لعبة المحتال بالإيموجي الجماعية
+    // دوال لعبة المحتال بالإيموجي الجماعية الشاملة مع عداد الوقت والآدمن
     function createUndercoverRoom() {
         currentUndercoverRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
+        let customTimer = parseInt(document.getElementById("room-timer-setting").value) || 60;
+        
+        // حفظ وقت النقاش وكون المنشيء هو الآدمن للغرفة
+        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/adminKey').set(userCloudKey);
+        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/discussionTime').set(customTimer);
+        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/startTime').set(Date.now());
+
         joinUndercoverRoomCode(currentUndercoverRoomCode);
     }
 
@@ -931,7 +975,6 @@
         const roomRef = db.ref('undercoverRooms/' + code + '/players');
         roomRef.child(userCloudKey).set({ name: playerName, avatarUrl: userAvatarUrl });
 
-        // التأكد من تعيين زوج كلمات عشوائي لهذه الغرفة إذا لم يكن موجوداً
         const pairRef = db.ref('undercoverRooms/' + code + '/currentPair');
         const spyRef = db.ref('undercoverRooms/' + code + '/spyKey');
 
@@ -972,12 +1015,57 @@
             }
         });
 
+        // تشغيل مؤقت التصويت المربوط بوقت الآدمن
+        startVotingTimer(code);
+
         const chatRef = db.ref('undercoverRooms/' + code + '/chat');
         chatRef.on('child_added', (snapshot) => {
             const msg = snapshot.val();
             const chatBox = document.getElementById("undercover-chat-box");
             chatBox.innerHTML += `<div class="chat-msg"><b>${msg.name}:</b> ${msg.text}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+
+    function startVotingTimer(code) {
+        if(votingInterval) clearInterval(votingInterval);
+
+        db.ref('undercoverRooms/' + code).once('value', (snapshot) => {
+            let roomData = snapshot.val();
+            if(!roomData) return;
+
+            let discussionSecs = roomData.discussionTime || 60;
+            let startTime = roomData.startTime || Date.now();
+            let endTime = startTime + (discussionSecs * 1000);
+
+            votingInterval = setInterval(() => {
+                let now = Date.now();
+                let timeLeft = Math.floor((endTime - now) / 1000);
+
+                let timerBanner = document.getElementById("voting-timer-banner");
+                let statusLabel = document.getElementById("voting-status-label");
+                let voteSelect = document.getElementById("vote-suspect-select");
+                let voteBtn = document.getElementById("cast-vote-btn");
+
+                if(timeLeft > 0) {
+                    timerBanner.innerText = `⏳ متبقي على فتح التصويت: ${timeLeft} ثانية من نقاش الجماعة`;
+                    statusLabel.innerText = `🗳️ مرحلة التصويت مقفلة حتى ينتهي الوقت (${timeLeft} ث):`;
+                    voteSelect.disabled = true;
+                    voteBtn.disabled = true;
+                    voteBtn.style.background = "var(--border-color)";
+                    voteBtn.style.color = "var(--text-muted)";
+                    voteBtn.style.cursor = "not-allowed";
+                } else {
+                    timerBanner.innerText = `✅ انتهى وقت النقاش! تم فتح باب التصويت لاختيار المحتال الآن 🚨`;
+                    statusLabel.innerText = `🗳️ مرحلة التصويت مفتوحة الآن:`;
+                    voteSelect.disabled = false;
+                    voteBtn.disabled = false;
+                    voteBtn.style.background = "var(--danger)";
+                    voteBtn.style.color = "white";
+                    voteBtn.style.cursor = "pointer";
+                    clearInterval(votingInterval);
+                }
+            }, 1000);
         });
     }
 
@@ -992,7 +1080,7 @@
 
             let roleDisplay = document.getElementById("undercover-my-role-display");
             if(data.spyKey === userCloudKey) {
-                roleDisplay.innerHTML = `<span style="color: var(--danger); font-size: 18px;">🕵️‍♂️ أنت المحتال (Imposter)!</span><br>ليس لديك كلمة سرية، حاول مجاراة أصدقائك وكشف الكلمة دون أن يتم كشفك!`;
+                roleDisplay.innerHTML = `<span style="color: var(--danger); font-size: 18px;">🕵️‍♂️ أنت المحتال (Imposter)!</span><br>ليس لديك كلمة سرية، تظاهر بأنك تعرف الكلمة وسط خضر وحيوانات وأشياء الجماعة دون أن تكشف!`;
             } else {
                 roleDisplay.innerHTML = `<span style="color: var(--success); font-size: 18px;">كلمتك السرية هي:</span><br><b>${data.currentPair.normal}</b>`;
             }
@@ -1025,6 +1113,7 @@
     }
 
     function leaveUndercoverRoom() {
+        if(votingInterval) clearInterval(votingInterval);
         if(userCloudKey && currentUndercoverRoomCode) {
             db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/players/' + userCloudKey).remove();
         }
@@ -1147,7 +1236,7 @@
         let nextRandomIdx = Math.floor(Math.random() * 500);
         db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').once('value', (tSnap) => {
             let currentTurn = tSnap.val() || 0;
-            db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').set(currentTurn + 1);
+            db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').set(currentTrust = currentTurn + 1);
         });
         db.ref('rooms/' + currentRoomCode + '/currentIndex').set(nextRandomIdx);
     }
@@ -1170,6 +1259,7 @@
     }
 
     function hideAllScreens() {
+        if(votingInterval) clearInterval(votingInterval);
         ['login-screen', 'lobby-screen', 'profile-screen', 'room-setup-screen', 'undercover-setup-screen', 'multiplayer-lobby', 'undercover-lobby'].forEach(id => {
             document.getElementById(id).classList.add("hidden");
         });
