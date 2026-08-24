@@ -419,7 +419,6 @@
     let myCustomId = localStorage.getItem("myId") || "";
     let currentSelectedLoginAvatar = "😎";
 
-    // 🧠 بنك الألغاز الضخم (يحتوي على أكثر من 300 لغز متنوع ومولد آلياً لضمان عدم النفاد)
     const baseRiddles = [
         { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
         { q: "له عيون ولا يرى، فما هو؟", options: ["الإبرة", "القط", "المفتاح", "الباب"], correct: 0 },
@@ -430,27 +429,16 @@
         { q: "يتحرك بلا رِجلين ولا يدخل إلا للأذنين، فما هو؟", options: ["الصوت", "الريح", "الهواء", "الضوء"], correct: 0 },
         { q: "ما هو البيت الذي ليس له أبواب ولا نوافذ؟", options: ["بيت الشعر", "بيت العصفور", "بيت العنكبوت", "بيت النمل"], correct: 0 },
         { q: "أحفه بالظلام ويحيط بي، وكلما أضاء المكان ذهبت، فما أنا؟", options: ["الظل", "النوم", "الخوف", "الليل"], correct: 0 },
-        { q: "ما هو الشيء الذي يحميك وتضعه فوق رأسك ولكنه يملك ساقاً واحدة؟", options: ["المظلة (الشمسية)", "القبعة", "المنضدة", "العصا"], correct: 0 },
-        { q: "ما هو الشيء الذي يكتب ولا يقرأ؟", options: ["القلم", "الكتاب", "السبورة", "الدفتر"], correct: 0 },
-        { q: "يتمشى معك ولكنه يختفي في الظلام، فما هو؟", options: ["الظل", "الصوت", "الانعكاس", "الهواء"], correct: 0 },
-        { q: "ما هو الشئ الذي كلما خطا خطوة فقط شيئاً من جسمه؟", options: ["إبرة الخياطة", "القلم الرصاص", "الشمعة", "الطباشير"], correct: 1 },
-        { q: "ما هو الشيء الذي يوجد وسط مكة؟", options: ["حرف الكاف", "البيت الحرام", "بئر زمزم", "المئذنة"], correct: 0 },
-        { q: "ما هو الشئ الذي إذا أزلنا حرفه الأول طار؟", options: ["قطار", "صقر", "طائر", "حمامة"], correct: 0 }
+        { q: "ما هو الشيء الذي يحميك وتضعه فوق رأسك ولكنه يملك ساقاً واحدة؟", options: ["المظلة (الشمسية)", "القبعة", "المنضدة", "العصا"], correct: 0 }
     ];
 
-    // توليد آلية ضخمة لتصل إلى 300+ لغز متنوع
     const riddlesBank = [];
-    for(let i=0; i<25; i++) {
+    for(let i=0; i<30; i++) {
         baseRiddles.forEach((r, idx) => {
-            riddlesBank.push({
-                q: `${r.q} (تحدي رقم ${i * 15 + idx + 1})`,
-                options: r.options,
-                correct: r.correct
-            });
+            riddlesBank.push({ q: `${r.q} (${i*10 + idx + 1})`, options: r.options, correct: r.correct });
         });
     }
 
-    // ⚡ بنك التحديات الجريئة (أكثر من 1000 تحدي)
     const baseDares = [
         "قم بتقليد صوت قطة غاضبة لمدة 10 ثوانٍ بصوت مرتفع!",
         "أرسل آخر كلمة غريبة كتبتها في هاتفك إلى الشات حالاً.",
@@ -471,7 +459,6 @@
         });
     }
 
-    // 💬 بنك الاعترافات الصريحة (أكثر من 1000 اعتراف)
     const baseConfessions = [
         "ما هو أكبر سر خفيته على عائلتك وخفت أن يعرفوه يوماً؟",
         "من هو الشخص في هذه الغرفة الذي تعتقد أنه الأكثر ذكاءً؟",
@@ -511,12 +498,8 @@
         const nameInput = document.getElementById("username").value.trim().toUpperCase();
         const passInput = document.getElementById("userpass").value.trim();
 
-        if(!nameInput) {
-            alert("المرجو كتابة اسمك المستعار!");
-            return;
-        }
-        if(!passInput) {
-            alert("المرجو كتابة كلمة المرور!");
+        if(!nameInput || !passInput) {
+            alert("المرجو إدخال الاسم وكلمة المرور!");
             return;
         }
 
@@ -524,10 +507,7 @@
             if (snapshot.exists()) {
                 let foundKey = "";
                 let userData = null;
-                snapshot.forEach((child) => {
-                    foundKey = child.key;
-                    userData = child.val();
-                });
+                snapshot.forEach((child) => { foundKey = child.key; userData = child.val(); });
 
                 if (userData.password === passInput) {
                     userCloudKey = foundKey;
@@ -537,11 +517,10 @@
                     myScore = userData.score || 0;
                     answeredCount = userData.answeredCount || 0;
                     myCustomId = userData.customId;
-
                     saveLocalData();
                     enterLobby();
                 } else {
-                    alert("كلمة المرور غير صحيحة لهذا الاسم! تأكد من كلمة المرور أو اختر اسماً جديداً.");
+                    alert("كلمة المرور غير صحيحة!");
                 }
             } else {
                 const newUserRef = db.ref('users').push();
@@ -553,15 +532,7 @@
                 answeredCount = 0;
                 myCustomId = "ID-" + Math.floor(100000 + Math.random() * 900000);
 
-                newUserRef.set({
-                    name: playerName,
-                    password: playerPass,
-                    emoji: userAvatarEmoji,
-                    score: myScore,
-                    answeredCount: answeredCount,
-                    customId: myCustomId
-                });
-
+                newUserRef.set({ name: playerName, password: playerPass, emoji: userAvatarEmoji, score: myScore, answeredCount: answeredCount, customId: myCustomId });
                 saveLocalData();
                 enterLobby();
             }
@@ -587,11 +558,7 @@
 
     function logout() {
         localStorage.clear();
-        playerName = "";
-        playerPass = "";
-        userCloudKey = "";
-        myScore = 0;
-        answeredCount = 0;
+        playerName = ""; playerPass = ""; userCloudKey = "";
         hideAllScreens();
         document.getElementById("login-screen").classList.remove("hidden");
     }
@@ -600,9 +567,7 @@
         const lbContainer = document.getElementById("global-leaderboard-list");
         db.ref('users').orderByChild('score').limitToLast(10).on('value', (snapshot) => {
             let usersList = [];
-            snapshot.forEach((child) => {
-                usersList.push(child.val());
-            });
+            snapshot.forEach((child) => { usersList.push(child.val()); });
             usersList.sort((a, b) => b.score - a.score);
 
             if(usersList.length === 0) {
@@ -627,7 +592,6 @@
     function openProfile() {
         hideAllScreens();
         document.getElementById("profile-screen").classList.remove("hidden");
-        
         document.getElementById("profile-avatar-display").innerText = userAvatarEmoji;
         document.getElementById("profile-name-display").innerText = playerName;
         document.getElementById("profile-id-display").innerText = `معرف الأيدي: #${myCustomId}`;
@@ -641,10 +605,7 @@
         document.getElementById("profile-avatar-display").innerText = emoji;
         document.querySelectorAll('#profile-avatar-picker .avatar-option').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
-        
-        if(userCloudKey) {
-            db.ref('users/' + userCloudKey + '/emoji').set(emoji);
-        }
+        if(userCloudKey) db.ref('users/' + userCloudKey + '/emoji').set(emoji);
     }
 
     function openRoomSetup() {
@@ -659,10 +620,7 @@
 
     function joinRoom() {
         const code = document.getElementById("room-code-input").value.trim();
-        if(!code) {
-            alert("المرجو إدخال رمز الغرفة أولاً!");
-            return;
-        }
+        if(!code) { alert("أدخل رمز الغرفة أولاً!"); return; }
         currentRoomCode = code;
         joinRoomCode(currentRoomCode);
     }
@@ -673,9 +631,7 @@
         document.getElementById("room-info-text").innerText = `رمز الغرفة: #${code}`;
 
         const roomRef = db.ref('rooms/' + code + '/players');
-        let playerInRoomRef = roomRef.child(userCloudKey);
-
-        playerInRoomRef.set({ name: playerName, emoji: userAvatarEmoji, score: myScore });
+        roomRef.child(userCloudKey).set({ name: playerName, emoji: userAvatarEmoji, score: myScore });
 
         roomRef.on('value', (snapshot) => {
             const players = snapshot.val();
@@ -701,7 +657,7 @@
                         if(isTurn) {
                             let notice = document.getElementById("turn-notice");
                             if(key === userCloudKey) {
-                                notice.innerText = "⭐ الدور دورك أنت الآن! أجب أو نفذ المطلوب.";
+                                notice.innerText = "⭐ الدور دورك أنت الآن! اختر هل نفذت أو انسحبت.";
                             } else {
                                 notice.innerText = `⏳ الدور الآن على: ${p.name} (${p.emoji})`;
                             }
@@ -756,7 +712,7 @@
         optionsEl.innerHTML = "";
 
         if(mode === 'riddles') {
-            titleEl.innerText = "🧠 بنك الألغاز الذكية (أكثر من 300 لغز)";
+            titleEl.innerText = "🧠 بنك الألغاز الذكية";
             let r = riddlesBank[index % riddlesBank.length];
             textEl.innerText = r.q;
             
@@ -767,15 +723,23 @@
                 optionsEl.innerHTML += `<div class="quiz-option" onclick="submitTurnAnswer(${item.isCorrect}, '${item.text}')">${oIdx + 1}. ${item.text}</div>`;
             });
         } else if(mode === 'dares') {
-            titleEl.innerText = "⚡ بنك التحديات الجريئة (أكثر من 1000 تحدي)";
+            titleEl.innerText = "⚡ بنك التحديات الجريئة";
             let dareText = daresBank[index % daresBank.length];
             textEl.innerText = dareText;
-            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceTurnAction('التحدي', '${dareText}')">تم تنفيذ التحدي بنجاح (+1 نقطة)! 🔥</button>`;
+            // خيارين: تنفيذ التحدي (يأخذ نقطة) أو رفض/انسحاب (بدون نقطة)
+            optionsEl.innerHTML = `
+                <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('التحدي', '${dareText}', true)">نفذت التحدي بنجاح (+1 نقطة) ✅</button>
+                <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('التحدي', '${dareText}', false)">رفضت التحدي / انسحبت ❌</button>
+            `;
         } else {
-            titleEl.innerText = "💬 بنك الاعترافات الصريحة (أكثر من 1000 اعتراف)";
+            titleEl.innerText = "💬 بنك الاعترافات الصريحة";
             let confessText = confessionsBank[index % confessionsBank.length];
             textEl.innerText = confessText;
-            optionsEl.innerHTML = `<button class="btn-primary" onclick="announceTurnAction('الاعتراف', '${confessText}')">لقد اعترفت بصراحة (+1 نقطة)! 🤫</button>`;
+            // خيارين: اعترف بصراحة (يأخذ نقطة) أو رفض الاعتراف (بدون نقطة)
+            optionsEl.innerHTML = `
+                <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('الاعتراف', '${confessText}', true)">اعترفت بصراحة تامة (+1 نقطة) 🤫</button>
+                <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('الاعتراف', '${confessText}', false)">رفضت الاعتراف صامتاً 🤐</button>
+            `;
         }
     }
 
@@ -795,33 +759,37 @@
                 name: "🏆 إجابة صحيحة",
                 text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أجاب بـ (${chosenText}) وربح نقطة!`
             });
-            nextTurn();
         } else {
             chatRef.push({
                 name: `❌ ${playerName} ${userAvatarEmoji}`,
-                text: `اختار إجابة خاطئة (${chosenText})، حاول مجدداً.`
+                text: `اختار إجابة خاطئة (${chosenText}) ولم يربح شيئاً.`
             });
-            nextTurn();
         }
+        nextTurn();
     }
 
-    function announceTurnAction(actionType, contentText) {
-        myScore += 1;
-        answeredCount++;
-        localStorage.setItem("myScore", myScore);
-        localStorage.setItem("answeredCount", answeredCount);
-
-        if(userCloudKey) {
-            db.ref('users/' + userCloudKey + '/score').set(myScore);
-            db.ref('users/' + userCloudKey + '/answeredCount').set(answeredCount);
-        }
-        db.ref('rooms/' + currentRoomCode + '/players/' + userCloudKey + '/score').set(myScore);
-
+    function announceTurnAction(actionType, contentText, didComplete) {
         const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
-        chatRef.push({
-            name: "🔥 تحدي / اعتراف منجز",
-            text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أنجز ${actionType}: (${contentText}) وربح نقطة!`
-        });
+        answeredCount++;
+        localStorage.setItem("answeredCount", answeredCount);
+        if(userCloudKey) db.ref('users/' + userCloudKey + '/answeredCount').set(answeredCount);
+
+        if(didComplete) {
+            myScore += 1;
+            localStorage.setItem("myScore", myScore);
+            if(userCloudKey) db.ref('users/' + userCloudKey + '/score').set(myScore);
+            db.ref('rooms/' + currentRoomCode + '/players/' + userCloudKey + '/score').set(myScore);
+
+            chatRef.push({
+                name: `🔥 إنجاز ${actionType}`,
+                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] قام بـ (${actionType}): [ ${contentText} ] وربح نقطة بنجاح!`
+            });
+        } else {
+            chatRef.push({
+                name: `❌ انسحاب من ${actionType}`,
+                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] رفض أو انسحب من (${actionType}): [ ${contentText} ] (بدون نقاط).`
+            });
+        }
         nextTurn();
     }
 
