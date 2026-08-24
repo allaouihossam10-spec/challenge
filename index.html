@@ -137,11 +137,6 @@
             text-align: center;
             transition: 0.3s;
         }
-        .player-avatar-card.active-turn {
-            border-color: var(--warning);
-            background: rgba(245, 158, 11, 0.15);
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
-        }
         
         .profile-img-tag {
             width: 40px;
@@ -198,29 +193,6 @@
         .game-title { font-size: 14px; color: var(--warning); font-weight: bold; margin-bottom: 6px; }
         .game-content { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: var(--text-main); }
         
-        .quiz-option {
-            background: #101728;
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            margin: 6px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-        .quiz-option:hover { border-color: var(--accent); background: #1b2642; }
-
-        .turn-banner {
-            background: rgba(245, 158, 11, 0.2);
-            border: 1px solid var(--warning);
-            color: var(--warning);
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
         .chat-box {
             background: #172138;
             border: 1px solid var(--border-color);
@@ -273,21 +245,15 @@
             margin: 10px 0;
             text-align: right;
         }
-
-        @media (max-width: 600px) {
-            .container { padding: 15px; min-height: 92vh; }
-            h2 { font-size: 18px; }
-            .game-content { font-size: 14px; }
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 1. شاشة الدخول بالاسم وكلمة المرور -->
+    <!-- 1. شاشة الدخول -->
     <div id="login-screen">
         <h2>🔥 منصة التحديات والألغاز الجماعية</h2>
-        <p>اكتب اسمك، كلمة المرور، ورابط صورة بروفيلك المباشر (أو تركها فارغة لصورة افتراضية):</p>
+        <p>اكتب اسمك، كلمة المرور، ورابط صورة بروفيلك المباشر:</p>
         
         <input type="text" id="username" placeholder="اكتب اسمك المستعار هنا...">
         <input type="password" id="userpass" placeholder="اكتب كلمة المرور الخاصة بك...">
@@ -305,39 +271,16 @@
             <div class="lobby-btn" onclick="openProfile()" style="border-color: rgba(99, 102, 241, 0.4);">
                 <span style="color: #818cf8;">👤 ملفي الشخصي (البروفيل، الأيدي، الإحصائيات)</span> <span>➔</span>
             </div>
-            <div class="lobby-btn" onclick="openRoomSetup()" style="border-color: rgba(16, 185, 129, 0.4);">
-                <span style="color: var(--success);">⚔️ غرف الأصدقاء (تحديات ونقاط)</span> <span style="color: var(--success);">➔</span>
-            </div>
             <div class="lobby-btn" onclick="openUndercoverSetup()" style="border-color: rgba(245, 158, 11, 0.4);">
                 <span style="color: var(--warning);">🕵️‍♂️ لعبة المحتال بالإيموجي (السرية والتصويت والوقت)</span> <span style="color: var(--warning);">➔</span>
             </div>
 
-            <!-- لوحة تحكم الآدمن الخاصة -->
-            <div id="admin-controls-container" class="admin-panel hidden">
-                <div style="font-size: 14px; font-weight: bold; color: var(--danger); margin-bottom: 8px;">🛠️ لوحة تحكم الآدمن (إدارة النقاط والمتصدرين)</div>
-                
-                <div style="background: #172138; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
-                    <div style="font-size: 12px; color: var(--warning); margin-bottom: 4px;">إضافة أو خصم نقاط لاعب بالاسم:</div>
-                    <input type="text" id="admin-target-user" placeholder="اكتب اسم اللاعب المستهدف..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
-                    <input type="number" id="admin-points-amount" placeholder="عدد النقاط (مثال: 5 أو للإزالة اكتب -5)..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
-                    <button onclick="adminModifyUserPoints()" style="background: var(--accent); color: white; padding: 8px; margin: 4px 0 0 0; font-size: 13px;">تنفيذ تعديل النقاط ⚡</button>
-                </div>
-
-                <div style="background: #172138; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
-                    <div style="font-size: 12px; color: var(--danger); margin-bottom: 4px;">حذف حساب لاعب نهائياً من المتصدرين:</div>
-                    <input type="text" id="admin-delete-user" placeholder="اكتب اسم اللاعب المراد حذفه..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
-                    <button onclick="adminDeleteUser()" style="background: var(--danger); color: white; padding: 8px; margin: 4px 0 0 0; font-size: 13px;">حذف الحساب نهائياً 🗑️</button>
-                </div>
-
-                <button onclick="resetWeeklyLeaderboard()" style="background: var(--danger); color: white; padding: 10px; margin: 0; font-size: 13px;">🗑️ تصفير ومسح لوحة المتصدرين بالكامل</button>
-            </div>
-
-            <h3 style="font-size: 15px; color: var(--warning); margin: 15px 0 5px 0; text-align: right;">🏆 لوحة الشرف والمتصدرين الأسبوعية</h3>
+            <h3 style="font-size: 15px; color: var(--warning); margin: 15px 0 5px 0; text-align: right;">🏆 لوحة الشرف والمتصدرين</h3>
             <div class="leaderboard-box" id="global-leaderboard-list">
                 <div style="color: var(--text-muted); text-align: center; font-size: 13px;">جاري تحميل المتصدرين...</div>
             </div>
         </div>
-        <button onclick="logout()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 10px; padding: 8px;">تسجيل الخروج من الحساب</button>
+        <button onclick="logout()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 10px; padding: 8px;">تسجيل الخروج</button>
     </div>
 
     <!-- 3. شاشة البروفيل الشخصي -->
@@ -348,46 +291,16 @@
                 <img id="profile-img-display" src="" alt="صورة البروفيل" class="profile-img-large" onerror="this.src='https://i.imgur.com/6VBx3io.png'">
                 <h3 id="profile-name-display" style="margin: 5px 0; color: var(--text-main);">اسم اللاعب</h3>
                 <p style="font-size: 13px; color: var(--accent); margin-bottom: 15px;" id="profile-id-display">معرف الأيدي: #----</p>
-                
-                <div style="display: flex; justify-content: space-around; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 10px;">
-                    <div>
-                        <div style="font-size: 12px; color: var(--text-muted);">الأسئلة المجاب عليها</div>
-                        <div id="profile-answered-count" style="font-size: 18px; font-weight: bold; color: var(--success);">0</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 12px; color: var(--text-muted);">مجموع النقاط</div>
-                        <div id="profile-score-count" style="font-size: 18px; font-weight: bold; color: var(--warning);">0</div>
-                    </div>
-                </div>
             </div>
-
-            <p style="font-size: 13px; text-align: right;">تغيير رابط صورة البروفيل المباشر:</p>
-            <input type="text" id="new-avatar-url-input" placeholder="ألصق رابط الصورة المباشر هنا..." style="font-size: 13px; margin-top: 0;">
-            <button class="btn-primary" onclick="updateProfileAvatarUrl()" style="padding: 10px; font-size: 13px; margin-top: 5px;">حفظ الصورة الجديدة 🖼️</button>
         </div>
         <button class="btn-primary" onclick="backToLobby()" style="margin-top: 15px;">العودة إلى اللوبي</button>
     </div>
 
-    <!-- 4. إعداد غرفة التحديات العادية -->
-    <div id="room-setup-screen" class="hidden">
-        <div>
-            <h2 style="color: var(--success);">🎮 غرف الأصدقاء</h2>
-            <p>أنشئ غرفة جديدة وشارك الرمز، أو انضم لغرفة صديقك.</p>
-            
-            <button class="btn-primary" style="background: var(--success);" onclick="createRoom()">إنشاء غرفة جديدة 🛡️</button>
-            <div style="margin: 15px 0; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 1368)...">
-                <button class="btn-primary" onclick="joinRoom()">انضمام للغرفة 🚀</button>
-            </div>
-        </div>
-        <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 10px;">العودة للوبي</button>
-    </div>
-
-    <!-- 5. إعداد غرفة المحتال بالإيموجي -->
+    <!-- 4. إعداد غرفة المحتال بالإيموجي -->
     <div id="undercover-setup-screen" class="hidden">
         <div>
             <h2 style="color: var(--warning);">🕵️‍♂️ غرفة لعبة المحتال بالإيموجي</h2>
-            <p>حدد مدة وقت النقاش بالثواني (خاص بالآدمن منشيء الغرفة)، ثم أنشئ الغرفة أو انضم برمزها.</p>
+            <p>حدد مدة وقت النقاش بالثواني، ثم أنشئ الغرفة أو انضم برمزها.</p>
             
             <div style="text-align: right; margin-bottom: 5px; font-size: 13px; color: var(--warning);">مدة النقاش المسموحة قبل فتح التصويت (بالثواني):</div>
             <input type="number" id="room-timer-setting" value="60" placeholder="مثال: 60 ثانية" style="font-size: 14px;">
@@ -401,71 +314,41 @@
         <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 10px;">العودة للوبي</button>
     </div>
 
-    <!-- 6. الغرفة الجماعية للتحديات العادية -->
-    <div id="multiplayer-lobby" class="hidden">
-        <div>
-            <h2 style="color: var(--success); margin-bottom: 2px;">⚡ غرفة التحديات والنقاط الحية</h2>
-            <p id="room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0 10px 0;"></p>
-            
-            <div class="players-grid" id="players-avatars-container"></div>
-
-            <div style="margin: 8px 0; text-align: right;">
-                <select id="game-mode-select" onchange="changeGameMode(this.value)">
-                    <option value="riddles">🧠 بنك الألغاز الذكية (أكثر من 300 لغز)</option>
-                    <option value="dares">⚡ بنك التحديات الجريئة (أكثر من 1000 تحدي)</option>
-                    <option value="confessions">💬 بنك الاعترافات الصريحة (أكثر من 1000 اعتراف)</option>
-                </select>
-            </div>
-
-            <div class="game-box" id="active-game-box">
-                <div id="turn-notice" class="turn-banner">جاري تحديد صاحب الدور...</div>
-                <div class="game-title" id="game-category-title">النمط النشط</div>
-                <div class="game-content" id="game-main-text">جاري تحميل السؤال...</div>
-                <div id="game-options-container"></div>
-            </div>
-        </div>
-
-        <div>
-            <div class="chat-box" id="group-chat-box">
-                <div class="chat-msg"><b>النظام:</b> مرحباً بكم في الغرفة! الأسئلة تتجدد تلقائياً بدون تكرار.</div>
-            </div>
-            
-            <div class="chat-input-row">
-                <input type="text" id="group-chat-input" placeholder="اكتب رسالة..." onkeypress="if(event.key === 'Enter') sendGroupChat()">
-                <button class="btn-primary" onclick="sendGroupChat()">إرسال</button>
-            </div>
-
-            <button onclick="leaveRoom()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); margin-top: 5px; padding: 6px;">مغادرة الغرفة</button>
-        </div>
-    </div>
-
-    <!-- 7. غرفة لعبة المحتال بالإيموجي التفاعلية -->
+    <!-- 5. غرفة لعبة المحتال بالإيموجي -->
     <div id="undercover-lobby" class="hidden">
         <div>
-            <h2 style="color: var(--warning); margin-bottom: 2px;">🕵️‍♂️ صالون المحتال والإيموجي الشامل</h2>
+            <h2 style="color: var(--warning); margin-bottom: 2px;">🕵️‍♂️ صالون المحتال والإيموجي</h2>
             <p id="undercover-room-info-text" style="color: var(--warning); font-weight: bold; margin: 3px 0 5px 0;"></p>
-            <div id="voting-timer-banner" style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); padding: 6px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 8px;">⏳ عداد الوقت: جاري حساب انتهاء النقاش...</div>
+            <div id="voting-timer-banner" style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger); color: var(--danger); padding: 6px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 8px;">⏳ عداد الوقت: جاري الحساب...</div>
             
             <div class="players-grid" id="undercover-players-container"></div>
 
+            <!-- قسم التصويت واللعب -->
             <div class="game-box" id="undercover-game-box">
-                <div class="game-title">🔐 كلمتك السرية أو دورك في الجولة:</div>
+                <div class="game-title">🔐 كلمتك السرية أو دورك:</div>
                 <div class="game-content" id="undercover-my-role-display" style="font-size: 15px; color: var(--warning);">اضغط على الزر أدناه لمعرفة دورك سراً!</div>
                 <button class="btn-primary" style="background: var(--warning); color: #070913; margin-bottom: 10px;" onclick="revealMyUndercoverWord()">اضغط مطولاً / أكشف دوري سراً 👁️</button>
                 
                 <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;">
-                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;" id="voting-status-label">🗳️ مرحلة التصويت مقفلة حتى ينتهي الوقت:</div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;" id="voting-status-label">🗳️ مرحلة التصويت مقفلة:</div>
                     <select id="vote-suspect-select" disabled>
                         <option value="">التصويت مقفل مؤقتاً...</option>
                     </select>
                     <button id="cast-vote-btn" class="btn-primary" style="background: var(--border-color); color: var(--text-muted); padding: 10px; font-size: 13px; cursor: not-allowed;" onclick="castUndercoverVote()" disabled>تثبيت التصويت ضده 🚨</button>
                 </div>
             </div>
+
+            <!-- قسم الكشف والنتيجة النهائية مع العداد 10 ثواني -->
+            <div id="round-result-display" class="hidden" style="margin-top: 15px; padding: 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); border-radius: 10px; text-align: center;">
+                <h3 style="color: var(--success); margin: 0 0 5px 0;">🚨 انتهى الوقت وظهرت النتيجة!</h3>
+                <p id="imposter-reveal-text" style="font-size: 15px; font-weight: bold; margin: 5px 0; color: var(--text-main);"></p>
+                <p style="font-size: 13px; color: var(--warning); margin: 0;">إعادة الجولة تبدأ خلال <span id="restart-countdown">10</span> ثوانٍ...</p>
+            </div>
         </div>
 
         <div>
             <div class="chat-box" id="undercover-chat-box">
-                <div class="chat-msg"><b>النظام:</b> مرحباً بكم في لعبة المحتال الشاملة (خضر، حيوانات، ورود، وأشياء)! ناقشوا بحذر.</div>
+                <div class="chat-msg"><b>النظام:</b> مرحباً بكم في اللعبة. ناقشوا بحذر.</div>
             </div>
             
             <div class="chat-input-row">
@@ -498,183 +381,65 @@
     let playerName = localStorage.getItem("playerName") || "";
     let playerPass = localStorage.getItem("playerPass") || "";
     let userCloudKey = localStorage.getItem("userCloudKey") || "";
-    let currentRoomCode = "";
     let currentUndercoverRoomCode = "";
     let userAvatarUrl = localStorage.getItem("userAvatarUrl") || "https://i.imgur.com/6VBx3io.png";
-    let myScore = parseInt(localStorage.getItem("myScore") || "0");
-    let answeredCount = parseInt(localStorage.getItem("answeredCount") || "0");
-    let myCustomId = localStorage.getItem("myId") || "";
     let votingInterval = null;
+    let restartInterval = null;
 
-    const ADMIN_NAME = "HOUSSAM"; 
     const defaultAvatar = "https://i.imgur.com/6VBx3io.png";
 
-    // بنك شامل وضخم يضم جميع الخضر، الحيوانات، الورود، والأشياء مع إيموجيها بدقة عالية
     const undercoverPairs = [
-        // الخضر (Vegetables)
         { normal: "طماطم 🍅", spy: "بطاطس 🥔" },
         { normal: "خيار 🥒", spy: "جزر 🥕" },
         { normal: "بصل 🧅", spy: "ثوم 🧄" },
         { normal: "خس 🥬", spy: "سبانخ 🍃" },
         { normal: "فلفل 🌶️", spy: "باذنجان 🍆" },
-        { normal: "قرع 🎃", spy: "لفت 🟢" },
-        { normal: "ذرة 🌽", spy: "بازلاء 🟢" },
-        
-        // الحيوانات (Animals)
         { normal: "أسد 🦁", spy: "نمر 🐅" },
-        { normal: "قرد 🐒", spy: "شمبانزي 🦍" },
-        { normal: "فيل 🐘", spy: "حافور 🦏" },
         { normal: "قطة 🐱", spy: "كلب 🐶" },
         { normal: "أرنب 🐰", spy: "فأر 🐭" },
-        { normal: "بقرة 🐮", spy: "خروف 🐑" },
-        { normal: "حصان 🐴", spy: "حمار 🫏" },
-        { normal: "دجاجة 🐔", spy: "بطة 🦆" },
-        { normal: "ثعلب 🦊", spy: "ذئب 🐺" },
-        { normal: "بطريق 🐧", spy: "بجعة 🦢" },
-
-        // الورود والزهور (Flowers)
         { normal: "وردة حمراء 🌹", spy: "توليب 🌷" },
-        { normal: "أقحوان 🌼", spy: "عباد الشمس 🌻" },
-        { normal: "نرجس 💮", spy: "لبلاب 🌸" },
-        { normal: "فل 🌺", spy: "ياسمين 💮" },
-
-        // جميع الأشياء المتنوعة والأشياء اليومية (Objects & Items)
         { normal: "هاتف 📱", spy: "حاسوب 💻" },
         { normal: "ساعة ⌚", spy: "منبه ⏰" },
-        { normal: "مفتاح 🔑", spy: "قفل 🔒" },
-        { normal: "كرسي 🪑", spy: "طاولة 🪵" },
-        { normal: "قلم 🖊️", spy: "دفتر 📓" },
-        { normal: "سيارة 🚗", spy: "دراجة 🚲" },
-        { normal: "مصباح 💡", spy: "شمعة 🕯️" },
-        { normal: "نظارة 👓", spy: "قبعة 🧢" },
-        { normal: "حذاء 👟", spy: "حقيبة 🎒" },
-        { normal: "مقص ✂️", spy: "مشط 梳" },
-        { normal: "تلفاز 📺", spy: "راديو 📻" },
-        { normal: "سرير 🛏️", spy: "وسادة 枕" }
+        { normal: "مفتاح 🔑", spy: "قفل 🔒" }
     ];
-
-    const baseRiddles = [
-        { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
-        { q: "له عيون ولا يرى، فما هو؟", options: ["الإبرة", "القط", "المفتاح", "الباب"], correct: 0 },
-        { q: "ما هو الشيء الذي يمشي بلا رغبة ويطير بلا أجنحة؟", options: ["السحاب", "الريح", "الوقت", "الصاروخ"], correct: 1 },
-        { q: "ما هو الشيء الذي يقرصك ولا تراه؟", options: ["البعوض", "البرد", "الجوع", "الخوف"], correct: 1 },
-        { q: "ما هي القناة التي توجد في وسط الصحراء ولا يمر منها الماء؟", options: ["قناة السويس", "قناة التلفزيون", "قناة المجرى", "لا شيء"], correct: 1 },
-        { q: "ما هو الشيء الذي يولد كبيرًا ويموت صغيراً؟", options: ["الشمعة", "القلم", "الإنسان", "النهر"], correct: 0 },
-        { q: "يتحرك بلا رِجلين ولا يدخل إلا للأذنين، فما هو؟", options: ["الصوت", "الريح", "الهواء", "الضوء"], correct: 0 },
-        { q: "ما هو البيت الذي ليس له أبواب ولا نوافذ؟", options: ["بيت الشعر", "بيت العصفور", "بيت العنكبوت", "بيت النمل"], correct: 0 },
-        { q: "أحفه بالظلام ويحيط بي، وكلما أضاء المكان ذهبت، فما أنا؟", options: ["الظل", "النوم", "الخوف", "الليل"], correct: 0 },
-        { q: "ما هو الشيء الذي يحميك وتضعه فوق رأسك ولكنه يملك ساقاً واحدة؟", options: ["المظلة (الشمسية)", "القبعة", "المنضدة", "العصا"], correct: 0 }
-    ];
-
-    const riddlesBank = [];
-    for(let i=0; i<30; i++) {
-        baseRiddles.forEach((r, idx) => {
-            riddlesBank.push({ q: `${r.q} (${i*10 + idx + 1})`, options: r.options, correct: r.correct });
-        });
-    }
-
-    const baseDares = [
-        "قم بتقليد صوت قطة غاضبة لمدة 10 ثوانٍ بصوت مرتفع!",
-        "أرسل آخر كلمة غريبة كتبتها في هاتفك إلى الشات حالاً.",
-        "تحدث باللهجة البدوية في الشات طوال هذه الجولة.",
-        "اتصل بصديق خارج اللعبة وقل له 'أنا في الفضاء' وأغلق الخط.",
-        "قم بعمل 10 تمارين ضغط (Push-ups) واكتب تم في الشات.",
-        "ارسل صورة لأغرب شيء تراه أمامك الآن في الغرفة.",
-        "اقرأ آخر رسالة وصلت لك بصوت مضحك.",
-        "غنّ مقطعاً من أغنية شعبية بدون ألحان.",
-        "امدح نفسك بـ 3 صفات مبالغ فيها أمام الجميع.",
-        "امنع نفسك من استخدام حرف الـ (أ) في ردودك القادمة."
-    ];
-
-    const daresBank = [];
-    for(let i=0; i<100; i++) {
-        baseDares.forEach((d, idx) => {
-            daresBank.push(`[تحدي ${i * 10 + idx + 1}]: ${d}`);
-        });
-    }
-
-    const baseConfessions = [
-        "ما هو أكبر سر خفيته على عائلتك وخفت أن يعرفوه يوماً؟",
-        "من هو الشخص في هذه الغرفة الذي تعتقد أنه الأكثر ذكاءً؟",
-        "ما هو الموقف المحرج جداً الذي وقعت فيه ولن تستطيع نسيانه؟",
-        "هل سبق لك أن كذبت كذبة كبيرة ونجوت منها بأعجوبة؟ احكِها في الشات.",
-        "ما هو أكثر شيء تندم عليه في حياتك الدراسية أو الشخصية؟",
-        "ما هي أغرب عاردة تفعلها لوحدك ولا يعلم بها أحد؟",
-        "هل تشعر بالغيرة من شخص معين؟ ومن يكون؟",
-        "ما هو أكثر موقف شعرت فيه بالخوف الشديد في طفولتك؟",
-        "لو سنحت لك الفرصة لتغيير صفة واحدة في شخصيتك، ماذا ستكون؟",
-        "ما هي أول كلمة تقولها عادة عندما تستيقظ صباحاً؟"
-    ];
-
-    const confessionsBank = [];
-    for(let i=0; i<100; i++) {
-        baseConfessions.forEach((c, idx) => {
-            confessionsBank.push(`[اعتراف ${i * 10 + idx + 1}]: ${c}`);
-        });
-    }
 
     window.onload = function() {
         if(playerName && playerPass) {
-            if(!userCloudKey) {
-                db.ref('users').orderByChild('name').equalTo(playerName).once('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        snapshot.forEach((child) => {
-                            userCloudKey = child.key;
-                            localStorage.setItem("userCloudKey", userCloudKey);
-                        });
-                    }
-                    enterLobby();
-                });
-            } else {
-                enterLobby();
-            }
+            enterLobby();
         }
     };
 
     function verifyAndLogin() {
         const nameInput = document.getElementById("username").value.trim().toUpperCase();
         const passInput = document.getElementById("userpass").value.trim();
-        let imgInput = document.getElementById("useravatar-input").value.trim();
+        let imgInput = document.getElementById("useravatar-input").value.trim() || defaultAvatar;
 
         if(!nameInput || !passInput) {
             alert("المرجو إدخال الاسم وكلمة المرور!");
             return;
         }
 
-        if(!imgInput) {
-            imgInput = defaultAvatar;
-        }
-
         db.ref('users').orderByChild('name').equalTo(nameInput).once('value', (snapshot) => {
             if (snapshot.exists()) {
-                let foundKey = "";
-                let userData = null;
-                snapshot.forEach((child) => { foundKey = child.key; userData = child.val(); });
-
-                if (userData.password === passInput) {
-                    userCloudKey = foundKey;
-                    playerName = userData.name;
-                    playerPass = userData.password;
-                    userAvatarUrl = userData.avatarUrl || imgInput;
-                    myScore = userData.score || 0;
-                    answeredCount = userData.answeredCount || 0;
-                    myCustomId = userData.customId;
-                    saveLocalData();
-                    enterLobby();
-                } else {
-                    alert("كلمة المرور غير صحيحة!");
-                }
+                snapshot.forEach((child) => {
+                    userCloudKey = child.key;
+                    let userData = child.val();
+                    if (userData.password === passInput) {
+                        playerName = userData.name;
+                        userAvatarUrl = userData.avatarUrl || imgInput;
+                        saveLocalData();
+                        enterLobby();
+                    } else {
+                        alert("كلمة المرور غير صحيحة!");
+                    }
+                });
             } else {
                 const newUserRef = db.ref('users').push();
                 userCloudKey = newUserRef.key;
                 playerName = nameInput;
                 playerPass = passInput;
                 userAvatarUrl = imgInput;
-                myScore = 0;
-                answeredCount = 0;
-                myCustomId = "ID-" + Math.floor(100000 + Math.random() * 900000);
-
-                newUserRef.set({ name: playerName, password: playerPass, avatarUrl: userAvatarUrl, score: myScore, answeredCount: answeredCount, customId: myCustomId });
+                newUserRef.set({ name: playerName, password: playerPass, avatarUrl: userAvatarUrl, score: 0 });
                 saveLocalData();
                 enterLobby();
             }
@@ -686,107 +451,18 @@
         localStorage.setItem("playerPass", playerPass);
         localStorage.setItem("userCloudKey", userCloudKey);
         localStorage.setItem("userAvatarUrl", userAvatarUrl);
-        localStorage.setItem("myScore", myScore);
-        localStorage.setItem("answeredCount", answeredCount);
-        localStorage.setItem("myId", myCustomId);
     }
 
     function enterLobby() {
         hideAllScreens();
         document.getElementById("lobby-screen").classList.remove("hidden");
         document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
-        checkAdminPrivileges();
         loadGlobalLeaderboard();
-    }
-
-    function checkAdminPrivileges() {
-        const adminPanel = document.getElementById("admin-controls-container");
-        if (playerName === ADMIN_NAME) {
-            adminPanel.classList.remove("hidden");
-        } else {
-            adminPanel.classList.add("hidden");
-        }
-    }
-
-    function adminModifyUserPoints() {
-        const targetName = document.getElementById("admin-target-user").value.trim().toUpperCase();
-        const pointsVal = parseInt(document.getElementById("admin-points-amount").value);
-
-        if(!targetName || isNaN(pointsVal)) {
-            alert("المرجو إدخال اسم اللاعب وعدد النقاط بشكل صحيح!");
-            return;
-        }
-
-        db.ref('users').orderByChild('name').equalTo(targetName).once('value', (snapshot) => {
-            if(snapshot.exists()) {
-                snapshot.forEach((child) => {
-                    let userKey = child.key;
-                    let currentScore = child.val().score || 0;
-                    let newScore = currentScore + pointsVal;
-                    if(newScore < 0) newScore = 0;
-
-                    db.ref('users/' + userKey + '/score').set(newScore).then(() => {
-                        alert(`✅ تم تحديث نقاط اللاعب (${targetName}) بنجاح. أصبحت نقاطه: ${newScore}`);
-                        document.getElementById("admin-target-user").value = "";
-                        document.getElementById("admin-points-amount").value = "";
-                        loadGlobalLeaderboard();
-                    });
-                });
-            } else {
-                alert("❌ عذراً، لم يتم العثور على لاعب بهذا الاسم في قاعدة البيانات!");
-            }
-        });
-    }
-
-    function adminDeleteUser() {
-        const targetName = document.getElementById("admin-delete-user").value.trim().toUpperCase();
-
-        if(!targetName) {
-            alert("المرجو إدخال اسم اللاعب المراد حذفه!");
-            return;
-        }
-
-        if(targetName === ADMIN_NAME) {
-            alert("⚠️ لا يمكنك حذف حساب الآدمن الأساسي!");
-            return;
-        }
-
-        if(confirm(`⚠️ هل أنت متأكد من رغبتك في حذف اللاعب (${targetName}) نهائياً من قاعدة البيانات؟`)) {
-            db.ref('users').orderByChild('name').equalTo(targetName).once('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        db.ref('users/' + child.key).remove().then(() => {
-                            alert(`✅ تم حذف اللاعب (${targetName}) بنجاح وإزالته من لوحة المتصدرين!`);
-                            document.getElementById("admin-delete-user").value = "";
-                            loadGlobalLeaderboard();
-                        });
-                    });
-                } else {
-                    alert("❌ عذراً، لم يتم العثور على لاعب بهذا الاسم!");
-                }
-            });
-        }
-    }
-
-    function resetWeeklyLeaderboard() {
-        if(confirm("⚠️ هل أنت متأكد من رغبتك في تصفير نقاط الجميع وبدء أسبوع جديد؟")) {
-            db.ref('users').once('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        db.ref('users/' + childSnapshot.key + '/score').set(0);
-                    });
-                    myScore = 0;
-                    localStorage.setItem("myScore", 0);
-                    alert("✅ تم تصفير لوحة المتصدرين بنجاح!");
-                    loadGlobalLeaderboard();
-                }
-            });
-        }
     }
 
     function logout() {
         localStorage.clear();
-        playerName = ""; playerPass = ""; userCloudKey = "";
+        playerName = ""; playerPass = "";
         hideAllScreens();
         document.getElementById("login-screen").classList.remove("hidden");
     }
@@ -797,28 +473,12 @@
             let usersList = [];
             snapshot.forEach((child) => { usersList.push(child.val()); });
             usersList.sort((a, b) => b.score - a.score);
-
-            if(usersList.length === 0) {
-                lbContainer.innerHTML = `<div style="color: var(--text-muted); text-align: center; font-size: 13px;">لا توجد بيانات بعد.</div>`;
-                return;
-            }
-
             let html = "";
             usersList.forEach((u, index) => {
                 let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`;
-                let img = u.avatarUrl || defaultAvatar;
-                html += `
-                    <div class="leaderboard-item">
-                        <div style="display: flex; align-items: center;">
-                            <b>${medal}</b>
-                            <img src="${img}" class="leaderboard-avatar" onerror="this.src='${defaultAvatar}'">
-                            <span>${u.name}</span>
-                        </div>
-                        <div style="color: var(--warning); font-weight: bold;">⭐ ${u.score || 0} نقطة</div>
-                    </div>
-                `;
+                html += `<div class="leaderboard-item"><span><b>${medal}</b> ${u.name}</span><span style="color: var(--warning);">⭐ ${u.score || 0} نقطة</span></div>`;
             });
-            lbContainer.innerHTML = html;
+            lbContainer.innerHTML = html || "لا توجد بيانات";
         });
     }
 
@@ -827,51 +487,6 @@
         document.getElementById("profile-screen").classList.remove("hidden");
         document.getElementById("profile-img-display").src = userAvatarUrl;
         document.getElementById("profile-name-display").innerText = playerName;
-        document.getElementById("profile-id-display").innerText = `معرف الأيدي: #${myCustomId}`;
-        document.getElementById("profile-answered-count").innerText = answeredCount;
-        document.getElementById("profile-score-count").innerText = myScore;
-        document.getElementById("new-avatar-url-input").value = userAvatarUrl;
-    }
-
-    function updateProfileAvatarUrl() {
-        let newUrl = document.getElementById("new-avatar-url-input").value.trim();
-        if(!newUrl) {
-            alert("المرجو إدخال رابط صحيح للصورة!");
-            return;
-        }
-
-        if(!userCloudKey) {
-            db.ref('users').orderByChild('name').equalTo(playerName).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        userCloudKey = child.key;
-                        localStorage.setItem("userCloudKey", userCloudKey);
-                    });
-                    saveAvatarToCloud(newUrl);
-                } else {
-                    alert("⚠️ حدث خطأ في التعرف على الحساب. يرجى تسجيل الدخول مجدداً.");
-                }
-            });
-        } else {
-            saveAvatarToCloud(newUrl);
-        }
-    }
-
-    function saveAvatarToCloud(newUrl) {
-        userAvatarUrl = newUrl;
-        localStorage.setItem("userAvatarUrl", userAvatarUrl);
-        document.getElementById("profile-img-display").src = userAvatarUrl;
-
-        db.ref('users/' + userCloudKey + '/avatarUrl').set(newUrl).then(() => {
-            alert("✅ تم تحديث وحفظ صورة البروفيل بنجاح في السيرفر!");
-        }).catch((error) => {
-            alert("❌ فشل الحفظ في السيرفر: " + error.message);
-        });
-    }
-
-    function openRoomSetup() {
-        hideAllScreens();
-        document.getElementById("room-setup-screen").classList.remove("hidden");
     }
 
     function openUndercoverSetup() {
@@ -879,84 +494,17 @@
         document.getElementById("undercover-setup-screen").classList.remove("hidden");
     }
 
-    function createRoom() {
-        currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
-        joinRoomCode(currentRoomCode);
-    }
-
-    function joinRoom() {
-        const code = document.getElementById("room-code-input").value.trim();
-        if(!code) { alert("أدخل رمز الغرفة أولاً!"); return; }
-        currentRoomCode = code;
-        joinRoomCode(currentRoomCode);
-    }
-
-    function joinRoomCode(code) {
-        hideAllScreens();
-        document.getElementById("multiplayer-lobby").classList.remove("hidden");
-        document.getElementById("room-info-text", ).innerText = `رمز الغرفة: #${code}`;
-
-        const roomRef = db.ref('rooms/' + code + '/players');
-        roomRef.child(userCloudKey).set({ name: playerName, avatarUrl: userAvatarUrl, score: myScore });
-
-        roomRef.on('value', (snapshot) => {
-            const players = snapshot.val();
-            let avatarsHtml = "";
-            if (players) {
-                let pKeys = Object.keys(players);
-                db.ref('rooms/' + code + '/currentTurnIndex').once('value', (turnSnap) => {
-                    let tIdx = turnSnap.val() || 0;
-                    let activePlayerKey = pKeys[tIdx % pKeys.length];
-
-                    Object.entries(players).forEach(([key, p]) => {
-                        let isTurn = (key === activePlayerKey);
-                        let cardClass = isTurn ? "player-avatar-card active-turn" : "player-avatar-card";
-                        if(key === userCloudKey) myScore = p.score || 0;
-                        let pImg = p.avatarUrl || defaultAvatar;
-
-                        avatarsHtml += `
-                            <div class="${cardClass}">
-                                <img src="${pImg}" class="profile-img-tag" onerror="this.src='${defaultAvatar}'">
-                                <div class="player-name-tag">${p.name} ${isTurn ? '⭐' : ''}</div>
-                                <div class="player-score-tag">⭐ ${p.score || 0} نقطة</div>
-                            </div>
-                        `;
-                        if(isTurn) {
-                            let notice = document.getElementById("turn-notice");
-                            if(key === userCloudKey) {
-                                notice.innerText = "⭐ الدور دورك أنت الآن! اختر إجابتك أو نفذ التحدي.";
-                            } else {
-                                notice.innerText = `⏳ الدور الآن على: ${p.name}`;
-                            }
-                        }
-                    });
-                    document.getElementById("players-avatars-container").innerHTML = avatarsHtml;
-                });
-            }
-        });
-
-        syncGameMode(code);
-        syncGameItem(code);
-
-        const chatRef = db.ref('rooms/' + code + '/chat');
-        chatRef.on('child_added', (snapshot) => {
-            const msg = snapshot.val();
-            const chatBox = document.getElementById("group-chat-box");
-            chatBox.innerHTML += `<div class="chat-msg"><b>${msg.name}:</b> ${msg.text}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-    }
-
-    // دوال لعبة المحتال بالإيموجي الجماعية الشاملة مع عداد الوقت والآدمن
     function createUndercoverRoom() {
         currentUndercoverRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         let customTimer = parseInt(document.getElementById("room-timer-setting").value) || 60;
         
-        // حفظ وقت النقاش وكون المنشيء هو الآدمن للغرفة
-        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/adminKey').set(userCloudKey);
-        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/discussionTime').set(customTimer);
-        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/startTime').set(Date.now());
+        db.ref('undercoverRooms/' + currentUndercoverRoomCode).set({
+            startTime: Date.now(),
+            discussionTime: customTimer,
+            roundState: "discussing"
+        });
 
+        setupNewRoundData(currentUndercoverRoomCode);
         joinUndercoverRoomCode(currentUndercoverRoomCode);
     }
 
@@ -964,7 +512,23 @@
         const code = document.getElementById("undercover-code-input").value.trim();
         if(!code) { alert("أدخل رمز غرفة المحتال أولاً!"); return; }
         currentUndercoverRoomCode = code;
-        joinUndercoverRoomCode(currentUndercoverRoomCode);
+        joinUndercoverRoomCode(code);
+    }
+
+    function setupNewRoundData(code) {
+        let randomPair = undercoverPairs[Math.floor(Math.random() * undercoverPairs.length)];
+        db.ref('undercoverRooms/' + code + '/currentPair').set(randomPair);
+
+        db.ref('undercoverRooms/' + code + '/players').once('value', (pSnap) => {
+            if(pSnap.exists()) {
+                let keys = Object.keys(pSnap.val());
+                let randomSpy = keys[Math.floor(Math.random() * keys.length)];
+                db.ref('undercoverRooms/' + code + '/spyKey').set(randomSpy);
+                db.ref('undercoverRooms/' + code + '/votes').remove();
+                db.ref('undercoverRooms/' + code + '/roundState').set("discussing");
+                db.ref('undercoverRooms/' + code + '/startTime').set(Date.now());
+            }
+        });
     }
 
     function joinUndercoverRoomCode(code) {
@@ -972,58 +536,41 @@
         document.getElementById("undercover-lobby").classList.remove("hidden");
         document.getElementById("undercover-room-info-text").innerText = `رمز غرفة المحتال: #${code}`;
 
-        const roomRef = db.ref('undercoverRooms/' + code + '/players');
-        roomRef.child(userCloudKey).set({ name: playerName, avatarUrl: userAvatarUrl });
+        const roomRef = db.ref('undercoverRooms/' + code);
+        roomRef.child('players/' + userCloudKey).set({ name: playerName, avatarUrl: userAvatarUrl });
 
-        const pairRef = db.ref('undercoverRooms/' + code + '/currentPair');
-        const spyRef = db.ref('undercoverRooms/' + code + '/spyKey');
-
-        pairRef.once('value', (snap) => {
+        roomRef.child('currentPair').once('value', (snap) => {
             if (!snap.exists()) {
-                let randomPair = undercoverPairs[Math.floor(Math.random() * undercoverPairs.length)];
-                pairRef.set(randomPair);
-                roomRef.once('value', (pSnap) => {
-                    if(pSnap.exists()) {
-                        let keys = Object.keys(pSnap.val());
-                        let randomSpy = keys[Math.floor(Math.random() * keys.length)];
-                        spyRef.set(randomSpy);
-                    }
-                });
+                setupNewRoundData(code);
             }
         });
 
-        roomRef.on('value', (snapshot) => {
+        // مراقبة حالة الجولة (نقاش أو كشف النتيجة)
+        roomRef.child('roundState').on('value', (snap) => {
+            let state = snap.val();
+            if (state === "reveal") {
+                showRoundResults(code);
+            } else if (state === "discussing") {
+                document.getElementById("round-result-display").classList.add("hidden");
+                document.getElementById("undercover-game-box").style.display = "block";
+                startVotingTimer(code);
+            }
+        });
+
+        roomRef.child('players').on('value', (snapshot) => {
             const players = snapshot.val();
             let avatarsHtml = "";
             let voteSelectOptions = `<option value="">اختر الشخص الذي تشك أنه المحتال...</option>`;
-            
             if (players) {
                 Object.entries(players).forEach(([key, p]) => {
-                    let pImg = p.avatarUrl || defaultAvatar;
-                    avatarsHtml += `
-                        <div class="player-avatar-card">
-                            <img src="${pImg}" class="profile-img-tag" onerror="this.src='${defaultAvatar}'">
-                            <div class="player-name-tag">${p.name}</div>
-                        </div>
-                    `;
+                    avatarsHtml += `<div class="player-avatar-card"><img src="${p.avatarUrl || defaultAvatar}" class="profile-img-tag"><div class="player-name-tag">${p.name}</div></div>`;
                     if(key !== userCloudKey) {
-                        voteSelectOptions += `<option value="${p.name}">${p.name}</option>`;
+                        voteSelectOptions += `<option value="${key}">${p.name}</option>`;
                     }
                 });
                 document.getElementById("undercover-players-container").innerHTML = avatarsHtml;
                 document.getElementById("vote-suspect-select").innerHTML = voteSelectOptions;
             }
-        });
-
-        // تشغيل مؤقت التصويت المربوط بوقت الآدمن
-        startVotingTimer(code);
-
-        const chatRef = db.ref('undercoverRooms/' + code + '/chat');
-        chatRef.on('child_added', (snapshot) => {
-            const msg = snapshot.val();
-            const chatBox = document.getElementById("undercover-chat-box");
-            chatBox.innerHTML += `<div class="chat-msg"><b>${msg.name}:</b> ${msg.text}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
         });
     }
 
@@ -1057,7 +604,7 @@
                     voteBtn.style.cursor = "not-allowed";
                 } else {
                     timerBanner.innerText = `✅ انتهى وقت النقاش! تم فتح باب التصويت لاختيار المحتال الآن 🚨`;
-                    statusLabel.innerText = `🗳️ مرحلة التصويت مفتوحة الآن:`;
+                    statusLabel.innerText = `🗳️ مرحلة التصويت مفتوحة للجميع:`;
                     voteSelect.disabled = false;
                     voteBtn.disabled = false;
                     voteBtn.style.background = "var(--danger)";
@@ -1070,17 +617,11 @@
     }
 
     function revealMyUndercoverWord() {
-        const roomBase = db.ref('undercoverRooms/' + currentUndercoverRoomCode);
-        roomBase.once('value', (snapshot) => {
+        db.ref('undercoverRooms/' + currentUndercoverRoomCode).once('value', (snapshot) => {
             let data = snapshot.val();
-            if(!data || !data.currentPair || !data.spyKey) {
-                alert("جاري إعداد الجولة، انتظر قليلاً...");
-                return;
-            }
-
             let roleDisplay = document.getElementById("undercover-my-role-display");
             if(data.spyKey === userCloudKey) {
-                roleDisplay.innerHTML = `<span style="color: var(--danger); font-size: 18px;">🕵️‍♂️ أنت المحتال (Imposter)!</span><br>ليس لديك كلمة سرية، تظاهر بأنك تعرف الكلمة وسط خضر وحيوانات وأشياء الجماعة دون أن تكشف!`;
+                roleDisplay.innerHTML = `<span style="color: var(--danger); font-size: 18px;">🕵️‍♂️ أنت المحتال (Imposter)!</span><br>تظاهر بأنك تعرف الكلمة وسط الجماعة دون أن تكشف!`;
             } else {
                 roleDisplay.innerHTML = `<span style="color: var(--success); font-size: 18px;">كلمتك السرية هي:</span><br><b>${data.currentPair.normal}</b>`;
             }
@@ -1088,18 +629,73 @@
     }
 
     function castUndercoverVote() {
-        let suspectName = document.getElementById("vote-suspect-select").value;
-        if(!suspectName) {
+        let suspectKey = document.getElementById("vote-suspect-select").value;
+        if(!suspectKey) {
             alert("المرجو اختيار شخص للتشكيك فيه أولاً!");
             return;
         }
 
-        const chatRef = db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/chat');
-        chatRef.push({
-            name: `🚨 تصويت من ${playerName}`,
-            text: `صوت اللاعب [ ${playerName} ] ضد اللاعب [ ${suspectName} ] باعتباره المحتال!`
+        db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/votes/' + userCloudKey).set(suspectKey).then(() => {
+            alert("✅ تم تسجيل صوتك بنجاح!");
+            
+            // التحقق واش كلشي لي في الغرفة صوتوا
+            checkAllVotesSubmitted();
         });
-        alert(`✅ تم إرسال صوتك ضد (${suspectName}) بنجاح إلى الشات الجماعي!`);
+    }
+
+    function checkAllVotesSubmitted() {
+        const roomRef = db.ref('undercoverRooms/' + currentUndercoverRoomCode);
+        roomRef.once('value', (snapshot) => {
+            let roomData = snapshot.val();
+            if(!roomData || !roomData.players) return;
+
+            let totalPlayers = Object.keys(roomData.players).length;
+            let totalVotes = roomData.votes ? Object.keys(roomData.votes).length : 0;
+
+            // إذا الكل صوت، يتم الإعلان عن النتيجة للجميع
+            if (totalVotes >= totalPlayers) {
+                roomRef.child('roundState').set("reveal");
+            }
+        });
+    }
+
+    function showRoundResults(code) {
+        if(votingInterval) clearInterval(votingInterval);
+
+        db.ref('undercoverRooms/' + code).once('value', (snapshot) => {
+            let data = snapshot.val();
+            if(!data) return;
+
+            let spyKey = data.spyKey;
+            let spyName = data.players[spyKey] ? data.players[spyKey].name : "المحتال";
+            let secretWord = data.currentPair.normal;
+
+            // إخفاء خيارات التصويت وإظهار النتيجة
+            document.getElementById("undercover-game-box").style.display = "none";
+            let resultDisplay = document.getElementById("round-result-display");
+            resultDisplay.classList.remove("hidden");
+
+            document.getElementById("imposter-reveal-text").innerHTML = `المحتال كان هو: <span style="color: var(--danger);">${spyName}</span><br>الكلمة السرية كانت: <span style="color: var(--success);">${secretWord}</span>`;
+
+            // عداد 10 ثواني لإعادة اللعبة من جديد
+            let timeLeft = 10;
+            document.getElementById("restart-countdown").innerText = timeLeft;
+
+            if(restartInterval) clearInterval(restartInterval);
+            restartInterval = setInterval(() => {
+                timeLeft--;
+                let counterEl = document.getElementById("restart-countdown");
+                if(counterEl) counterEl.innerText = timeLeft;
+
+                if(timeLeft <= 0) {
+                    clearInterval(restartInterval);
+                    // أول لاعب موجود فالغرفة هو لي كيولد جولة جديدة باش ميتعطلش السيستيم
+                    if(userCloudKey === Object.keys(data.players)[0]) {
+                        setupNewRoundData(code);
+                    }
+                }
+            }, 1000);
+        });
     }
 
     function sendUndercoverChat() {
@@ -1114,153 +710,17 @@
 
     function leaveUndercoverRoom() {
         if(votingInterval) clearInterval(votingInterval);
+        if(restartInterval) clearInterval(restartInterval);
         if(userCloudKey && currentUndercoverRoomCode) {
             db.ref('undercoverRooms/' + currentUndercoverRoomCode + '/players/' + userCloudKey).remove();
         }
         backToLobby();
     }
 
-    function changeGameMode(mode) {
-        if(!currentRoomCode) return;
-        let randomStartIdx = Math.floor(Math.random() * 100);
-        db.ref('rooms/' + currentRoomCode + '/gameMode').set(mode);
-        db.ref('rooms/' + currentRoomCode + '/currentIndex').set(randomStartIdx);
-        db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').set(0);
-    }
-
-    function syncGameMode(code) {
-        db.ref('rooms/' + code + '/gameMode').on('value', (snapshot) => {
-            let mode = snapshot.val() || 'riddles';
-            document.getElementById("game-mode-select").value = mode;
-        });
-    }
-
-    function syncGameItem(code) {
-        db.ref('rooms/' + code + '/currentIndex').on('value', (snapshot) => {
-            let idx = snapshot.val() || 0;
-            db.ref('rooms/' + code + '/gameMode').once('value', (mSnapshot) => {
-                let mode = mSnapshot.val() || 'riddles';
-                renderGameContent(mode, idx);
-            });
-        });
-    }
-
-    function renderGameContent(mode, index) {
-        const titleEl = document.getElementById("game-category-title");
-        const textEl = document.getElementById("game-main-text");
-        const optionsEl = document.getElementById("game-options-container");
-        optionsEl.innerHTML = "";
-
-        if(mode === 'riddles') {
-            titleEl.innerText = "🧠 بنك الألغاز الذكية";
-            let r = riddlesBank[index % riddlesBank.length];
-            textEl.innerText = r.q;
-            
-            let optionPairs = r.options.map((opt, i) => ({ text: opt, isCorrect: (i === r.correct) })) ;
-            optionPairs.sort(() => Math.random() - 0.5);
-
-            optionPairs.forEach((item, oIdx) => {
-                optionsEl.innerHTML += `<div class="quiz-option" onclick="submitTurnAnswer(${item.isCorrect}, '${item.text}')">${oIdx + 1}. ${item.text}</div>`;
-            });
-        } else if(mode === 'dares') {
-            titleEl.innerText = "⚡ بنك التحديات الجريئة";
-            let dareText = daresBank[index % daresBank.length];
-            textEl.innerText = dareText;
-            optionsEl.innerHTML = `
-                <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('التحدي', '${dareText}', true)">نفذت التحدي بنجاح (+1 نقطة) ✅</button>
-                <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('التحدي', '${dareText}', false)">رفضت التحدي / انسحبت ❌</button>
-            `;
-        } else {
-            titleEl.innerText = "💬 بنك الاعترافات الصريحة";
-            let confessText = confessionsBank[index % confessionsBank.length];
-            textEl.innerText = confessText;
-            optionsEl.innerHTML = `
-                <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('الاعتراف', '${confessText}', true)">اعترفت بصراحة تامة (+1 نقطة) 🤫</button>
-                <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('الاعتراف', '${confessText}', false)">رفضت الاعتراف صامتاً 🤐</button>
-            `;
-        }
-    }
-
-    function submitTurnAnswer(isCorrect, chosenText) {
-        const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
-        answeredCount++;
-        localStorage.setItem("answeredCount", answeredCount);
-        if(userCloudKey) db.ref('users/' + userCloudKey + '/answeredCount').set(answeredCount);
-
-        if(isCorrect) {
-            myScore += 1;
-            localStorage.setItem("myScore", myScore);
-            if(userCloudKey) db.ref('users/' + userCloudKey + '/score').set(myScore);
-            db.ref('rooms/' + currentRoomCode + '/players/' + userCloudKey + '/score').set(myScore);
-
-            chatRef.push({
-                name: "🏆 إجابة صحيحة",
-                text: `اللاعب [ ${playerName} ] أجاب بـ (${chosenText}) وربح نقطة!`
-            });
-        } else {
-            chatRef.push({
-                name: `❌ ${playerName}`,
-                text: `اختار إجابة خاطئة (${chosenText}) ولم يربح شيئاً.`
-            });
-        }
-        nextTurn();
-    }
-
-    function announceTurnAction(actionType, contentText, didComplete) {
-        const chatRef = db.ref('rooms/' + currentRoomCode + '/chat');
-        answeredCount++;
-        localStorage.setItem("answeredCount", answeredCount);
-        if(userCloudKey) db.ref('users/' + userCloudKey + '/answeredCount').set(answeredCount);
-
-        if(didComplete) {
-            myScore += 1;
-            localStorage.setItem("myScore", myScore);
-            if(userCloudKey) db.ref('users/' + userCloudKey + '/score').set(myScore);
-            db.ref('rooms/' + currentRoomCode + '/players/' + userCloudKey + '/score').set(myScore);
-
-            chatRef.push({
-                name: `🔥 إنجاز ${actionType}`,
-                text: `اللاعب [ ${playerName} ] قام بـ (${actionType}): [ ${contentText} ] وربح نقطة بنجاح!`
-            });
-        } else {
-            chatRef.push({
-                name: `❌ انسحاب من ${actionType}`,
-                text: `اللاعب [ ${playerName} ] رفض أو انسحب من (${actionType}): [ ${contentText} ] (بدون نقاط).`
-            });
-        }
-        nextTurn();
-    }
-
-    function nextTurn() {
-        if(!currentRoomCode) return;
-        let nextRandomIdx = Math.floor(Math.random() * 500);
-        db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').once('value', (tSnap) => {
-            let currentTurn = tSnap.val() || 0;
-            db.ref('rooms/' + currentRoomCode + '/currentTurnIndex').set(currentTrust = currentTurn + 1);
-        });
-        db.ref('rooms/' + currentRoomCode + '/currentIndex').set(nextRandomIdx);
-    }
-
-    function sendGroupChat() {
-        const input = document.getElementById("group-chat-input");
-        if(input.value.trim() === "") return;
-        db.ref('rooms/' + currentRoomCode + '/chat').push({
-            name: `${playerName}`,
-            text: input.value.trim()
-        });
-        input.value = "";
-    }
-
-    function leaveRoom() {
-        if(userCloudKey && currentRoomCode) {
-            db.ref('rooms/' + currentRoomCode + '/players/' + userCloudKey).remove();
-        }
-        backToLobby();
-    }
-
     function hideAllScreens() {
         if(votingInterval) clearInterval(votingInterval);
-        ['login-screen', 'lobby-screen', 'profile-screen', 'room-setup-screen', 'undercover-setup-screen', 'multiplayer-lobby', 'undercover-lobby'].forEach(id => {
+        if(restartInterval) clearInterval(restartInterval);
+        ['login-screen', 'lobby-screen', 'profile-screen', 'undercover-setup-screen', 'undercover-lobby'].forEach(id => {
             document.getElementById(id).classList.add("hidden");
         });
     }
