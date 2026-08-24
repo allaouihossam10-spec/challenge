@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التحدي الجماعي - الأصدقاء</title>
+    <title>منصة التحدي الجماعي - الأونلاين</title>
+    <!-- استدعاء مكتبات Firebase عبر CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --bg-color: #070913;
@@ -31,15 +35,16 @@
 
         .container {
             background: var(--card-bg);
-            padding: 30px;
+            padding: 25px;
             border-radius: 20px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             width: 100%;
-            max-width: 550px;
+            max-width: 520px;
             text-align: center;
             border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
+            box-sizing: border-box;
         }
 
         .container::before {
@@ -52,32 +57,32 @@
             background: linear-gradient(90deg, #6366f1, #10b981, #f59e0b);
         }
 
-        h2 { margin-top: 0; font-size: 22px; font-weight: 700; }
-        p { color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+        h2 { margin-top: 0; font-size: 21px; font-weight: 700; }
+        p { color: var(--text-muted); font-size: 13px; line-height: 1.4; }
 
         input, select {
             width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
             border: 1px solid var(--border-color);
             background: #172138;
             color: var(--text-main);
-            text-align: center;
-            font-size: 15px;
+            text-align: right;
+            font-size: 14px;
             outline: none;
             box-sizing: border-box;
         }
 
-        input:focus { border-color: var(--accent); }
+        input:focus, select:focus { border-color: var(--accent); }
 
         button {
             width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
             border: none;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -95,11 +100,11 @@
             background: #172138;
             border: 1px solid var(--border-color);
             text-align: right;
-            padding: 15px 20px;
+            padding: 14px 18px;
             margin: 10px 0;
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--text-main);
-            font-size: 15px;
+            font-size: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -108,42 +113,24 @@
         }
         .lobby-btn:hover { background: #202e4d; border-color: var(--accent); }
 
-        .option-btn {
-            background: #172138;
-            margin: 8px 0;
-            text-align: right;
-            padding: 14px 18px;
-            color: var(--text-main);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            font-size: 15px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .option-btn:hover { background: #202e4d; border-color: var(--accent); }
-
         .hidden { display: none; }
 
-        /* منطقة الأفاتار داخل اللوبي الجماعي */
         .players-grid {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 15px 0;
+            gap: 12px;
+            margin: 12px 0;
             flex-wrap: wrap;
         }
         .player-avatar-card {
             background: #172138;
             border: 2px solid var(--success);
-            padding: 10px;
-            border-radius: 12px;
-            width: 90px;
+            padding: 8px;
+            border-radius: 10px;
+            width: 110px;
             text-align: center;
         }
-        .avatar-icon {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
+        .avatar-icon { font-size: 24px; margin-bottom: 2px; }
         .player-name-tag {
             font-size: 12px;
             font-weight: bold;
@@ -152,25 +139,31 @@
             white-space: nowrap;
         }
 
-        /* شاشة الشات */
         .chat-box {
             background: #172138;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            height: 120px;
+            border-radius: 10px;
+            height: 100px;
             overflow-y: auto;
-            padding: 10px;
+            padding: 8px;
             text-align: right;
-            margin: 10px 0;
-            font-size: 13px;
+            margin: 8px 0;
+            font-size: 12px;
         }
-        .chat-msg { margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .chat-msg { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 3px; }
 
-        /* قائمة المتصدرين */
-        table { width: 100%; margin-top: 15px; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 14px; }
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .chat-input-row input { margin: 0; flex: 1; }
+        .chat-input-row button { width: 75px; margin: 0; padding: 12px 5px; }
+
+        table { width: 100%; margin-top: 12px; border-collapse: collapse; }
+        th, td { padding: 8px; border-bottom: 1px solid var(--border-color); text-align: center; font-size: 13px; }
         th { background: #172138; color: var(--warning); }
-        .badge { background: rgba(245, 158, 11, 0.15); color: var(--warning); padding: 4px 10px; border-radius: 6px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -178,9 +171,9 @@
 <div class="container">
     <!-- 1. شاشة الدخول -->
     <div id="login-screen">
-        <h2>🔥 العباقرة والأصدقاء</h2>
-        <p>سجل اسمك وعمرك للانضمام إلى الغرف الجماعية وتحدي أصحابك.</p>
-        <input type="text" id="username" placeholder="اسمك المستعار...">
+        <h2>🔥 العباقرة والأصدقاء (أونلاين)</h2>
+        <p>سجل اسمك وعمرك للانضمام إلى الغرف الجماعية الحية.</p>
+        <input type="text" id="username" placeholder="اكتب اسمك المستعار هنا...">
         <input type="number" id="userage" placeholder="عمرك (مثال: 18)..." min="10" max="99">
         <button class="btn-primary" onclick="enterPlatform()">دخول إلى المنصة 🚀</button>
     </div>
@@ -188,132 +181,82 @@
     <!-- 2. اللوبي الرئيسي -->
     <div id="lobby-screen" class="hidden">
         <h2 id="welcome-msg" style="color: #818cf8; margin-bottom: 5px;"></h2>
-        <p style="margin-bottom: 15px;">اختر نظام اللعب:</p>
+        <p style="margin-bottom: 12px;">اختر نظام اللعب:</p>
         
         <div class="lobby-btn" onclick="openRoomSetup()" style="border-color: rgba(16, 185, 129, 0.4);">
-            <span style="color: var(--success);">⚔️ اللعب مع الأصدقاء (غرفة وأفاتار وشات)</span> <span style="color: var(--success);">➔</span>
+            <span style="color: var(--success);">⚔️ اللعب مع الأصدقاء (أونلاين حقيقي)</span> <span style="color: var(--success);">➔</span>
         </div>
         <div class="lobby-btn" onclick="openLeaderboard()" style="border-color: rgba(245, 158, 11, 0.4);">
-            <span style="color: var(--warning);">🏆 لوحة المتصدرين (الرئيسية)</span> <span style="color: var(--warning);">➔</span>
+            <span style="color: var(--warning);">🏆 لوحة المتصدرين العامة</span> <span style="color: var(--warning);">➔</span>
         </div>
     </div>
 
-    <!-- 3. شاشة إعداد الغرفة (إنشاء أو انضمام برمز) -->
+    <!-- 3. إعداد الغرفة -->
     <div id="room-setup-screen" class="hidden">
         <h2 style="color: var(--success);">🎮 غرف الأصدقاء</h2>
-        <p>أنشئ غرفة جديدة واعطِ الرمز لصديقك، أو أدخل رمز الغرفة للانضمام معه.</p>
+        <p>أنشئ غرفة جديدة وشارك الرمز مع صديقك، أو انضم لغرفة موجودة.</p>
         
         <button class="btn-primary" style="background: var(--success);" onclick="createRoom()">إنشاء غرفة جديدة 🛡️</button>
-        <div style="margin: 15px 0; border-top: 1px solid var(--border-color); padding-top: 15px;">
+        <div style="margin: 12px 0; border-top: 1px solid var(--border-color); padding-top: 12px;">
             <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 4589)...">
             <button class="btn-primary" onclick="joinRoom()">انضمام للغرفة 🚀</button>
         </div>
         <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 5px;">العودة للوبي</button>
     </div>
 
-    <!-- 4. اللوبي الجماعي (الأفاتار، التصويت، والشات) -->
+    <!-- 4. اللوبي الجماعي الأونلاين -->
     <div id="multiplayer-lobby" class="hidden">
         <h2 style="color: var(--success);">👥 غرفة التحدي الجماعي</h2>
-        <p id="room-info-text" style="color: var(--warning); font-weight: bold;"></p>
+        <p id="room-info-text" style="color: var(--warning); font-weight: bold; margin: 5px 0;"></p>
         
-        <!-- ظهور الأفاتار ديال اللاعبين -->
-        <p style="margin: 5px 0; font-size: 13px;">اللاعبون المتواجدون في الغرفة:</p>
-        <div class="players-grid" id="players-avatars-container">
-            <!-- تتزاد تلقائيا -->
-        </div>
+        <p style="margin: 3px 0; font-size: 12px;">اللاعبون المتواجدون في الغرفة:</p>
+        <div class="players-grid" id="players-avatars-container"></div>
 
-        <!-- خانة التصويت على النمط -->
-        <div style="background: #172138; padding: 10px; border-radius: 12px; margin: 10px 0;">
-            <p style="margin: 0 0 5px 0; font-size: 13px;">صوت على نمط التحدي:</p>
-            <select id="vote-mode-select">
-                <option value="puzzles">🧩 الألغاز (300+ لغز)</option>
-                <option value="challenges">🔥 تحديات الذكاء والأقوال</option>
-            </select>
-        </div>
-
-        <!-- الشات المباشر -->
         <div class="chat-box" id="group-chat-box">
-            <div class="chat-msg"><b>النظام:</b> مرحباً بكم في الغرفة! تحدثوا مع بعضكم هنا بحرية.</div>
+            <div class="chat-msg"><b>النظام:</b> مرحباً بكم في الغرفة الحية!</div>
         </div>
-        <div style="display: flex; gap: 5px;">
-            <input type="text" id="group-chat-input" placeholder="اكتب رسالة..." style="margin:0;">
-            <button class="btn-primary" style="width: 80px; margin:0;" onclick="sendGroupChat()">إرسال</button>
+        
+        <div class="chat-input-row">
+            <input type="text" id="group-chat-input" placeholder="اكتب رسالة...">
+            <button class="btn-primary" onclick="sendGroupChat()">إرسال</button>
         </div>
 
-        <button class="btn-primary" style="background: var(--success); margin-top: 15px;" onclick="startRoomGame()">بدء التحدي الآن ⚡</button>
-        <button onclick="backToLobby()" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); margin-top: 5px;">مغادرة الغرفة</button>
+        <button onclick="leaveRoom()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; margin-top: 8px;">مغادرة الغرفة</button>
     </div>
 
-    <!-- 5. شاشة لوحة المتصدرين (بخانات مستقلة) -->
+    <!-- 5. المتصدرين -->
     <div id="leaderboard-screen" class="hidden">
         <h2 style="color: var(--warning);">🏆 قائمة المتصدرين في المنصة</h2>
-        <p>أفضل الأساطير الذين حطّموا النتائج:</p>
         <table>
             <thead>
-                <tr>
-                    <th>المرتبة</th>
-                    <th>الاسم</th>
-                    <th>النقطة</th>
-                </tr>
+                <tr><th>المرتبة</th><th>الاسم</th><th>النقطة</th></tr>
             </thead>
             <tbody id="leaderboard-body"></tbody>
         </table>
-        <button class="btn-primary" onclick="backToLobby()" style="margin-top: 20px;">العودة إلى اللوبي</button>
-    </div>
-
-    <!-- 6. شاشة الأسئلة التنافسية -->
-    <div id="quiz-screen" class="hidden">
-        <p id="question-progress" style="color: #818cf8; font-weight: bold; margin-bottom: 10px;"></p>
-        <h3 id="question-text" style="line-height: 1.6; font-size: 17px; margin-bottom: 20px;">السؤال هنا</h3>
-        <div id="options-container"></div>
-    </div>
-
-    <!-- 7. شاشة النتيجة -->
-    <div id="result-screen" class="hidden">
-        <h2>🏆 تقرير النتيجة</h2>
-        <p id="final-score-text" style="font-size: 18px; margin: 25px 0;"></p>
-        <button class="btn-primary" onclick="backToLobby()">العودة إلى اللوبي الرئيسي</button>
+        <button class="btn-primary" onclick="backToLobby()" style="margin-top: 15px;">العودة إلى اللوبي</button>
     </div>
 </div>
 
 <script>
+    // 🔑 **المفاتيح الخاصة بمشروعك التي استخرجناها من Firebase**
+    const firebaseConfig = {
+        apiKey: "AIzaSyBKkpzmYA1MCgh9PqziPW5lTlptKuBGfs",
+        authDomain: "challengegame-cbde0.firebaseapp.com",
+        databaseURL: "https://challengegame-cbde0-default-rtdb.firebaseio.com", // أضفنا رابط قاعدة البيانات Realtime Database هنا مباشرة
+        projectId: "challengegame-cbde0",
+        storageBucket: "challengegame-cbde0.firebasestorage.app",
+        messagingSenderId: "466386419067",
+        appId: "1:466386419067:web:1a93d54708ad43d33651de",
+        measurementId: "G-C8GKFXYD41"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     let playerName = "";
     let playerAge = "";
     let currentRoomCode = "";
-    let currentQuestions = [];
-    let currentQuestionIndex = 0;
-    let score = 0;
-    let activeMode = "";
-
-    // بنوك ضخمة من الأسئلة والألغاز والتحديات
-    const basePuzzles = [
-        { q: "شيء تملكه أنت ويستخدمه الآخرون بكثرة أكثر مني ومنك، فما هو؟", options: ["اسمك", "عقلك", "سيارتك", "هاتفك"], answer: 0 },
-        { q: "أربعة أخوان يمشون معاً دائماً، يتبع بعضهم بعضاً ولا يتجاوزون بعضهم، فما هم؟", options: ["عجلات السيارة", "أرجل الطاولة", "ساعات الحائط", "أصابع اليدين"], answer: 0 },
-        { q: "مفارقة الوقت: شيء إن زاد نقص، وإن نقص زاد، فما هو؟", options: ["العمر (الوقت المتبقي)", "المال في البنك", "عدد الأصدقاء", "المسافة"], answer: 0 },
-        { q: "ما هو البيت الذي ليس فيه أبواب ولا أوصاف ولا توجد فيه أي نوافذ؟", options: ["بيت الشعر", "بيت العنكبوت", "بيت الطين", "بيت النسيان"], answer: 0 },
-        { q: "يتحدث جميع اللغات ولكنه لا يملك لساناً، فمن يكون؟", options: ["صدى الصوت", "الكتاب", "الراديو", "الحاسوب"], answer: 0 }
-    ];
-
-    const baseChallenges = [
-        { q: "قيل فلسفياً: 'الذكي الحقيقي هو من يدرك كم هو جاهل'. ما تفسير ذلك؟", options: ["الجهل يريح العقل", "الاعتراف بمحدودية المعرفة هو دافع التعلم والتقدم المستمر", "الغباء يوفر سعادة", "العلماء يعانون"], answer: 1 },
-        { q: "يقول نيتشه: 'من يملك أسباباً للعيش، يمكنه أن يتحمل أي طريقة'. ماذا تعني عميقاً؟", options: ["الهدف والغاية في الحياة يمنحان القدرة على تجاوز أقسى الصعاب", "المادة أهم من الأفكار", "العيش بدون أهداف أفضل", "التحمل بالحظ"], answer: 0 },
-        { q: "حسب فلسفة العبث، عندما يبحث الإنسان عن معنى وسط عالم صامت، فرد الفعل الواعي هو:", options: ["الاستسلام للحزن", "خلق المعنى الذاتي والتمرد الواعي على العبث", "تجاهل الواقع", "البحث عن إجابات جاهزة"], answer: 1 }
-    ];
-
-    function generateMassiveQuestions(baseArray) {
-        let massive = [];
-        for (let i = 0; i < 60; i++) { // تكرار ذكي لتوفير مئات الأسئلة
-            baseArray.forEach((item) => {
-                massive.push({ q: item.q, options: item.options, answer: item.answer });
-            });
-        }
-        return massive;
-    }
-
-    const questionBanks = {
-        puzzles: generateMassiveQuestions(basePuzzles),
-        challenges: generateMassiveQuestions(baseChallenges)
-    };
+    let userKey = "";
 
     function enterPlatform() {
         const nameInput = document.getElementById("username").value.trim();
@@ -342,7 +285,7 @@
 
     function createRoom() {
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
-        enterGroupLobby(currentRoomCode);
+        joinRoomCode(currentRoomCode);
     }
 
     function joinRoom() {
@@ -352,97 +295,87 @@
             return;
         }
         currentRoomCode = code;
-        enterGroupLobby(currentRoomCode);
+        joinRoomCode(currentRoomCode);
     }
 
-    function enterGroupLobby(code) {
+    function joinRoomCode(code) {
         hideAllScreens();
         document.getElementById("multiplayer-lobby").classList.remove("hidden");
         document.getElementById("room-info-text").innerText = `رمز الغرفة: #${code}`;
-        
-        // توليد الأفاتار الخاص بك وصديقك الافتراضي في الغرفة
-        const avatarsContainer = document.getElementById("players-avatars-container");
-        avatarsContainer.innerHTML = `
-            <div class="player-avatar-card">
-                <div class="avatar-icon">😎</div>
-                <div class="player-name-tag">${playerName} (أنت)</div>
-            </div>
-            <div class="player-avatar-card" style="border-color: var(--accent);">
-                <div class="avatar-icon">🦊</div>
-                <div class="player-name-tag">صديق الغرفة</div>
-            </div>
-        `;
+
+        // تسجيل اللاعب في قاعدة بيانات Firebase داخل الغرفة
+        const roomRef = db.ref('rooms/' + code + '/players');
+        const newUserRef = roomRef.push();
+        userKey = newUserRef.key;
+        newUserRef.set({ name: playerName });
+
+        // حذف اللاعب تلقائياً إذا خرج من الصفحة
+        newUserRef.onDisconnect().remove();
+
+        // الاستماع للاعبين المتواجدين في الوقت الحقيقي
+        roomRef.on('value', (snapshot) => {
+            const players = snapshot.val();
+            let avatarsHtml = "";
+            if (players) {
+                Object.values(players).forEach((p, index) => {
+                    avatarsHtml += `
+                        <div class="player-avatar-card">
+                            <div class="avatar-icon">${index === 0 ? '😎' : '🦊'}</div>
+                            <div class="player-name-tag">${p.name}</div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById("players-avatars-container").innerHTML = avatarsHtml;
+        });
+
+        // الاستماع لرسائل الشات في الوقت الحقيقي
+        const chatRef = db.ref('rooms/' + code + '/chat');
+        chatRef.on('child_added', (snapshot) => {
+            const msg = snapshot.val();
+            const chatBox = document.getElementById("group-chat-box");
+            chatBox.innerHTML += `<div class="chat-msg"><b>${msg.name}:</b> ${msg.text}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
     }
 
     function sendGroupChat() {
         const input = document.getElementById("group-chat-input");
-        const chatBox = document.getElementById("group-chat-box");
         if(input.value.trim() === "") return;
 
-        chatBox.innerHTML += `<div class="chat-msg"><b>${playerName}:</b> ${input.value}</div>`;
-        input.value = "";
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function startRoomGame() {
-        const selectedVote = document.getElementById("vote-mode-select").value;
-        activeMode = selectedVote;
-        currentQuestions = questionBanks[selectedVote];
-        currentQuestionIndex = 0;
-        score = 0;
-
-        hideAllScreens();
-        document.getElementById("quiz-screen").classList.remove("hidden");
-        showQuestion();
-    }
-
-    function showQuestion() {
-        if(currentQuestionIndex >= 20) { // 20 سؤال ممتع لكل جولة جماعية
-            showResult();
-            return;
-        }
-        let q = currentQuestions[currentQuestionIndex];
-        document.getElementById("question-progress").innerText = `السؤال ${currentQuestionIndex + 1} من 20`;
-        document.getElementById("question-text").innerText = q.q;
-        
-        let optHtml = "";
-        q.options.forEach((opt, index) => {
-            optHtml += `<button class="option-btn" onclick="selectAnswer(${index})">${opt}</button>`;
+        const chatRef = db.ref('rooms/' + codeFromCurrent() + '/chat');
+        chatRef.push({
+            name: playerName,
+            text: input.value.trim()
         });
-        document.getElementById("options-container").innerHTML = optHtml;
+        input.value = "";
     }
 
-    function selectAnswer(selectedIndex) {
-        if(selectedIndex === currentQuestions[currentQuestionIndex].answer) {
-            score += 10; 
+    function codeFromCurrent() {
+        return currentRoomCode;
+    }
+
+    function leaveRoom() {
+        if(userKey && currentRoomCode) {
+            db.ref('rooms/' + currentRoomCode + '/players/' + userKey).remove();
         }
-        currentQuestionIndex++;
-        showQuestion();
-    }
-
-    function showResult() {
-        hideAllScreens();
-        document.getElementById("result-screen").classList.remove("hidden");
-        document.getElementById("final-score-text").innerHTML = `أهلاً <span class="badge">${playerName}</span>، نتيجتك في الغرفة هي: <b>${score} نقطة</b>`;
-
-        // تسجيل النقطة في لوحة المتصدرين العامة
-        let leaderboard = JSON.parse(localStorage.getItem("global_leaderboard") || "[]");
-        leaderboard.push({name: playerName, score: score});
-        leaderboard.sort((a, b) => b.score - a.score);
-        localStorage.setItem("global_leaderboard", JSON.stringify(leaderboard));
+        backToLobby();
     }
 
     function renderLeaderboard() {
-        let leaderboard = JSON.parse(localStorage.getItem("global_leaderboard") || "[]");
-        let lbHtml = "";
-        leaderboard.slice(0, 10).forEach((item, index) => {
-            let rankEmoji = index === 0 ? "👑" : (index === 1 ? "🥈" : (index === 2 ? "🥉" : `#${index + 1}`));
-            lbHtml += `<tr><td>${rankEmoji}</td><td>${item.name}</td><td><b>${item.score}</b></td></tr>`;
+        db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+            let lbHtml = "";
+            let items = [];
+            snapshot.forEach((child) => { items.push(child.val()); });
+            items.reverse().forEach((item, index) => {
+                let rankEmoji = index === 0 ? "👑" : (index === 1 ? "🥈" : (index === 2 ? "🥉" : `#${index + 1}`));
+                lbHtml += `<tr><td>${rankEmoji}</td><td>${item.name}</td><td><b>${item.score}</b></td></tr>`;
+            });
+            if(items.length === 0) {
+                lbHtml = `<tr><td colspan="3" style="color:var(--text-muted)">لا توجد نتائج مسجلة بعد.</td></tr>`;
+            }
+            document.getElementById("leaderboard-body").innerHTML = lbHtml;
         });
-        if(leaderboard.length === 0) {
-            lbHtml = `<tr><td colspan="3" style="color:var(--text-muted)">لا توجد نتائج مسجلة بعد.</td></tr>`;
-        }
-        document.getElementById("leaderboard-body").innerHTML = lbHtml;
     }
 
     function hideAllScreens() {
@@ -451,9 +384,9 @@
         document.getElementById("room-setup-screen").classList.add("hidden");
         document.getElementById("multiplayer-lobby").classList.add("hidden");
         document.getElementById("leaderboard-screen").classList.add("hidden");
-        document.getElementById("quiz-screen").classList.add("hidden");
-        document.getElementById("result-screen").classList.add("hidden");
     }
+
+    function backTest() {} // Helper
 
     function backToLobby() {
         hideAllScreens();
