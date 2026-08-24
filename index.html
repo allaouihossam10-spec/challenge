@@ -133,7 +133,7 @@
             border: 2px solid var(--border-color);
             padding: 8px;
             border-radius: 10px;
-            width: 120px;
+            width: 110px;
             text-align: center;
             transition: 0.3s;
         }
@@ -142,7 +142,38 @@
             background: rgba(245, 158, 11, 0.15);
             box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
         }
-        .avatar-icon { font-size: 24px; margin-bottom: 2px; }
+        
+        .profile-img-tag {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            margin-bottom: 2px;
+            background: #101728;
+        }
+
+        .profile-img-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+            margin-bottom: 10px;
+            background: #101728;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .leaderboard-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
         .player-name-tag {
             font-size: 12px;
             font-weight: bold;
@@ -212,28 +243,6 @@
         .chat-input-row input { margin: 0; flex: 1; padding: 12px; font-size: 13px; }
         .chat-input-row button { width: 80px; margin: 0; padding: 12px 5px; font-size: 13px; }
 
-        .avatar-selector {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .avatar-option {
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-            background: #172138;
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        .avatar-option.selected { border-color: var(--accent); background: rgba(99, 102, 241, 0.2); }
-
         .leaderboard-box {
             background: #172138;
             border: 1px solid var(--border-color);
@@ -278,19 +287,12 @@
     <!-- 1. شاشة الدخول بالاسم وكلمة المرور -->
     <div id="login-screen">
         <h2>🔥 منصة التحديات والألغاز الجماعية</h2>
-        <p>اكتب اسمك وكلمة المرور (إذا دخلت باسم الآدمن سيظهر لك لوحة التحكم الكاملة):</p>
+        <p>اكتب اسمك، كلمة المرور، ورابط صورة بروفيلك (أو تركها فارغة لصورة افتراضية):</p>
         
         <input type="text" id="username" placeholder="اكتب اسمك المستعار هنا...">
         <input type="password" id="userpass" placeholder="اكتب كلمة المرور الخاصة بك...">
+        <input type="text" id="useravatar-input" placeholder="رابط صورة البروفيل (مثال: https://i.imgur.com/...)" style="font-size: 13px;">
         
-        <p style="margin: 10px 0 0 0; font-size: 13px;">اختر صورة البروفيل:</p>
-        <div class="avatar-selector" id="login-avatar-picker">
-            <div class="avatar-option selected" onclick="selectLoginAvatar('😎', this)">😎</div>
-            <div class="avatar-option" onclick="selectLoginAvatar('🦊', this)">🦊</div>
-            <div class="avatar-option" onclick="selectLoginAvatar('🐯', this)">🐯</div>
-            <div class="avatar-option" onclick="selectLoginAvatar('🤖', this)">🤖</div>
-            <div class="avatar-option" onclick="selectLoginAvatar('👻', this)">👻</div>
-        </div>
         <button class="btn-primary" onclick="verifyAndLogin()" style="margin-top: 15px;">دخول إلى المنصة 🚀</button>
     </div>
 
@@ -307,7 +309,7 @@
                 <span style="color: var(--success);">⚔️ غرف الأصدقاء (تحديات ونقاط)</span> <span style="color: var(--success);">➔</span>
             </div>
 
-            <!-- لوحة تحكم الآدمن الخاصة (تظهر فقط إذا كان اسمك هو الآدمن) -->
+            <!-- لوحة تحكم الآدمن الخاصة -->
             <div id="admin-controls-container" class="admin-panel hidden">
                 <div style="font-size: 14px; font-weight: bold; color: var(--danger); margin-bottom: 8px;">🛠️ لوحة تحكم الآدمن (إدارة النقاط والمتصدرين)</div>
                 
@@ -317,6 +319,13 @@
                     <input type="text" id="admin-target-user" placeholder="اكتب اسم اللاعب المستهدف..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
                     <input type="number" id="admin-points-amount" placeholder="عدد النقاط (مثال: 5 أو للإزالة اكتب -5)..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
                     <button onclick="adminModifyUserPoints()" style="background: var(--accent); color: white; padding: 8px; margin: 4px 0 0 0; font-size: 13px;">تنفيذ تعديل النقاط ⚡</button>
+                </div>
+
+                <!-- حذف لاعب معين من قاعدة البيانات بالاسم -->
+                <div style="background: #172138; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                    <div style="font-size: 12px; color: var(--danger); margin-bottom: 4px;">حذف حساب لاعب نهائياً من المتصدرين:</div>
+                    <input type="text" id="admin-delete-user" placeholder="اكتب اسم اللاعب المراد حذفه..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
+                    <button onclick="adminDeleteUser()" style="background: var(--danger); color: white; padding: 8px; margin: 4px 0 0 0; font-size: 13px;">حذف الحساب نهائياً 🗑️</button>
                 </div>
 
                 <button onclick="resetWeeklyLeaderboard()" style="background: var(--danger); color: white; padding: 10px; margin: 0; font-size: 13px;">🗑️ تصفير ومسح لوحة المتصدرين بالكامل</button>
@@ -336,7 +345,7 @@
         <div>
             <h2 style="color: #818cf8;">👤 ملفي الشخصي</h2>
             <div style="background: #172138; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin: 15px 0;">
-                <div id="profile-avatar-display" style="font-size: 50px; margin-bottom: 10px;">😎</div>
+                <img id="profile-img-display" src="" alt="صورة البروفيل" class="profile-img-large" onerror="this.src='https://i.imgur.com/6VBx3io.png'">
                 <h3 id="profile-name-display" style="margin: 5px 0; color: var(--text-main);">اسم اللاعب</h3>
                 <p style="font-size: 13px; color: var(--accent); margin-bottom: 15px;" id="profile-id-display">معرف الأيدي: #----</p>
                 
@@ -352,14 +361,9 @@
                 </div>
             </div>
 
-            <p style="font-size: 13px;">تغيير صورة الأفاتار:</p>
-            <div class="avatar-selector" id="profile-avatar-picker">
-                <div class="avatar-option" onclick="changeProfileAvatar('😎', this)">😎</div>
-                <div class="avatar-option" onclick="changeProfileAvatar('🦊', this)">🦊</div>
-                <div class="avatar-option" onclick="changeProfileAvatar('🐯', this)">🐯</div>
-                <div class="avatar-option" onclick="changeProfileAvatar('🤖', this)">🤖</div>
-                <div class="avatar-option" onclick="changeProfileAvatar('👻', this)">👻</div>
-            </div>
+            <p style="font-size: 13px; text-align: right;">تغيير رابط صورة البروفيل:</p>
+            <input type="text" id="new-avatar-url-input" placeholder="ألصق رابط الصورة الجديدة هنا..." style="font-size: 13px; margin-top: 0;">
+            <button class="btn-primary" onclick="updateProfileAvatarUrl()" style="padding: 10px; font-size: 13px; margin-top: 5px;">حفظ الصورة الجديدة 🖼️</button>
         </div>
         <button class="btn-primary" onclick="backToLobby()" style="margin-top: 15px;">العودة إلى اللوبي</button>
     </div>
@@ -437,14 +441,13 @@
     let playerPass = localStorage.getItem("playerPass") || "";
     let userCloudKey = localStorage.getItem("userCloudKey") || "";
     let currentRoomCode = "";
-    let userAvatarEmoji = localStorage.getItem("userAvatar") || "😎";
+    let userAvatarUrl = localStorage.getItem("userAvatarUrl") || "https://i.imgur.com/6VBx3io.png";
     let myScore = parseInt(localStorage.getItem("myScore") || "0");
     let answeredCount = parseInt(localStorage.getItem("answeredCount") || "0");
     let myCustomId = localStorage.getItem("myId") || "";
-    let currentSelectedLoginAvatar = "😎";
 
-    // ** اسم الآدمن المعتمد **
     const ADMIN_NAME = "HOUSSAM"; 
+    const defaultAvatar = "https://i.imgur.com/6VBx3io.png";
 
     const baseRiddles = [
         { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
@@ -516,19 +519,18 @@
         }
     };
 
-    function selectLoginAvatar(emoji, element) {
-        currentSelectedLoginAvatar = emoji;
-        document.querySelectorAll('#login-avatar-picker .avatar-option').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-    }
-
     function verifyAndLogin() {
         const nameInput = document.getElementById("username").value.trim().toUpperCase();
         const passInput = document.getElementById("userpass").value.trim();
+        let imgInput = document.getElementById("useravatar-input").value.trim();
 
         if(!nameInput || !passInput) {
             alert("المرجو إدخال الاسم وكلمة المرور!");
             return;
+        }
+
+        if(!imgInput) {
+            imgInput = defaultAvatar;
         }
 
         db.ref('users').orderByChild('name').equalTo(nameInput).once('value', (snapshot) => {
@@ -541,7 +543,7 @@
                     userCloudKey = foundKey;
                     playerName = userData.name;
                     playerPass = userData.password;
-                    userAvatarEmoji = userData.emoji || currentSelectedLoginAvatar;
+                    userAvatarUrl = userData.avatarUrl || imgInput;
                     myScore = userData.score || 0;
                     answeredCount = userData.answeredCount || 0;
                     myCustomId = userData.customId;
@@ -555,12 +557,12 @@
                 userCloudKey = newUserRef.key;
                 playerName = nameInput;
                 playerPass = passInput;
-                userAvatarEmoji = currentSelectedLoginAvatar;
+                userAvatarUrl = imgInput;
                 myScore = 0;
                 answeredCount = 0;
                 myCustomId = "ID-" + Math.floor(100000 + Math.random() * 900000);
 
-                newUserRef.set({ name: playerName, password: playerPass, emoji: userAvatarEmoji, score: myScore, answeredCount: answeredCount, customId: myCustomId });
+                newUserRef.set({ name: playerName, password: playerPass, avatarUrl: userAvatarUrl, score: myScore, answeredCount: answeredCount, customId: myCustomId });
                 saveLocalData();
                 enterLobby();
             }
@@ -571,7 +573,7 @@
         localStorage.setItem("playerName", playerName);
         localStorage.setItem("playerPass", playerPass);
         localStorage.setItem("userCloudKey", userCloudKey);
-        localStorage.setItem("userAvatar", userAvatarEmoji);
+        localStorage.setItem("userAvatarUrl", userAvatarUrl);
         localStorage.setItem("myScore", myScore);
         localStorage.setItem("answeredCount", answeredCount);
         localStorage.setItem("myId", myCustomId);
@@ -594,7 +596,6 @@
         }
     }
 
-    // ** وظيفة تعديل النقاط (إضافة أو خصم) للاعب معين كآدمن **
     function adminModifyUserPoints() {
         const targetName = document.getElementById("admin-target-user").value.trim().toUpperCase();
         const pointsVal = parseInt(document.getElementById("admin-points-amount").value);
@@ -610,7 +611,7 @@
                     let userKey = child.key;
                     let currentScore = child.val().score || 0;
                     let newScore = currentScore + pointsVal;
-                    if(newScore < 0) newScore = 0; // لضمان عدم نزول النقاط تحت الصفر
+                    if(newScore < 0) newScore = 0;
 
                     db.ref('users/' + userKey + '/score').set(newScore).then(() => {
                         alert(`✅ تم تحديث نقاط اللاعب (${targetName}) بنجاح. أصبحت نقاطه: ${newScore}`);
@@ -625,8 +626,39 @@
         });
     }
 
+    // ** وظيفة جديدة لحذف حساب لاعب تجريبي من قاعدة البيانات والمتصدرين **
+    function adminDeleteUser() {
+        const targetName = document.getElementById("admin-delete-user").value.trim().toUpperCase();
+
+        if(!targetName) {
+            alert("المرجو إدخال اسم اللاعب المراد حذفه!");
+            return;
+        }
+
+        if(targetName === ADMIN_NAME) {
+            alert("⚠️ لا يمكنك حذف حساب الآدمن الأساسي!");
+            return;
+        }
+
+        if(confirm(`⚠️ هل أنت متأكد من رغبتك في حذف اللاعب (${targetName}) نهائياً من قاعدة البيانات؟`)) {
+            db.ref('users').orderByChild('name').equalTo(targetName).once('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        db.ref('users/' + child.key).remove().then(() => {
+                            alert(`✅ تم حذف اللاعب (${targetName}) بنجاح وإزالته من لوحة المتصدرين!`);
+                            document.getElementById("admin-delete-user").value = "";
+                            loadGlobalLeaderboard();
+                        });
+                    });
+                } else {
+                    alert("❌ عذراً، لم يتم العثور على لاعب بهذا الاسم!");
+                }
+            });
+        }
+    }
+
     function resetWeeklyLeaderboard() {
-        if(confirm("⚠️ هل أنت متأكد من رغبتك في تصفير نقاط الجميع وبدء أسبوع جديد؟ سيتم مسح النقاط وإعادتها إلى الصفر.")) {
+        if(confirm("⚠️ هل أنت متأكد من رغبتك في تصفير نقاط الجميع وبدء أسبوع جديد؟")) {
             db.ref('users').once('value', (snapshot) => {
                 if(snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
@@ -634,7 +666,7 @@
                     });
                     myScore = 0;
                     localStorage.setItem("myScore", 0);
-                    alert("✅ تم تصفير لوحة المتصدرين بنجاح وبدء أسبوع جديد!");
+                    alert("✅ تم تصفير لوحة المتصدرين بنجاح!");
                     loadGlobalLeaderboard();
                 }
             });
@@ -663,9 +695,14 @@
             let html = "";
             usersList.forEach((u, index) => {
                 let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`;
+                let img = u.avatarUrl || defaultAvatar;
                 html += `
                     <div class="leaderboard-item">
-                        <div><b>${medal} ${u.emoji || '😎'} ${u.name}</b></div>
+                        <div style="display: flex; align-items: center;">
+                            <b>${medal}</b>
+                            <img src="${img}" class="leaderboard-avatar" onerror="this.src='${defaultAvatar}'">
+                            <span>${u.name}</span>
+                        </div>
                         <div style="color: var(--warning); font-weight: bold;">⭐ ${u.score || 0} نقطة</div>
                     </div>
                 `;
@@ -677,20 +714,25 @@
     function openProfile() {
         hideAllScreens();
         document.getElementById("profile-screen").classList.remove("hidden");
-        document.getElementById("profile-avatar-display").innerText = userAvatarEmoji;
+        document.getElementById("profile-img-display").src = userAvatarUrl;
         document.getElementById("profile-name-display").innerText = playerName;
         document.getElementById("profile-id-display").innerText = `معرف الأيدي: #${myCustomId}`;
         document.getElementById("profile-answered-count").innerText = answeredCount;
         document.getElementById("profile-score-count").innerText = myScore;
+        document.getElementById("new-avatar-url-input").value = userAvatarUrl;
     }
 
-    function changeProfileAvatar(emoji, element) {
-        userAvatarEmoji = emoji;
-        localStorage.setItem("userAvatar", userAvatarEmoji);
-        document.getElementById("profile-avatar-display").innerText = emoji;
-        document.querySelectorAll('#profile-avatar-picker .avatar-option').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-        if(userCloudKey) db.ref('users/' + userCloudKey + '/emoji').set(emoji);
+    function updateProfileAvatarUrl() {
+        let newUrl = document.getElementById("new-avatar-url-input").value.trim();
+        if(!newUrl) {
+            alert("المرجو إدخال رابط صحيح للصورة!");
+            return;
+        }
+        userAvatarUrl = newUrl;
+        localStorage.setItem("userAvatarUrl", userAvatarUrl);
+        document.getElementById("profile-img-display").src = userAvatarUrl;
+        if(userCloudKey) db.ref('users/' + userCloudKey + '/avatarUrl').set(userAvatarUrl);
+        alert("✅ تم تحديث صورة البروفيل بنجاح!");
     }
 
     function openRoomSetup() {
@@ -716,7 +758,7 @@
         document.getElementById("room-info-text").innerText = `رمز الغرفة: #${code}`;
 
         const roomRef = db.ref('rooms/' + code + '/players');
-        roomRef.child(userCloudKey).set({ name: playerName, emoji: userAvatarEmoji, score: myScore });
+        roomRef.child(userCloudKey).set({ name: playerName, avatarUrl: userAvatarUrl, score: myScore });
 
         roomRef.on('value', (snapshot) => {
             const players = snapshot.val();
@@ -731,10 +773,11 @@
                         let isTurn = (key === activePlayerKey);
                         let cardClass = isTurn ? "player-avatar-card active-turn" : "player-avatar-card";
                         if(key === userCloudKey) myScore = p.score || 0;
+                        let pImg = p.avatarUrl || defaultAvatar;
 
                         avatarsHtml += `
                             <div class="${cardClass}">
-                                <div class="avatar-icon">${p.emoji || '😎'}</div>
+                                <img src="${pImg}" class="profile-img-tag" onerror="this.src='${defaultAvatar}'">
                                 <div class="player-name-tag">${p.name} ${isTurn ? '⭐' : ''}</div>
                                 <div class="player-score-tag">⭐ ${p.score || 0} نقطة</div>
                             </div>
@@ -744,7 +787,7 @@
                             if(key === userCloudKey) {
                                 notice.innerText = "⭐ الدور دورك أنت الآن! اختر هل نفذت أو انسحبت.";
                             } else {
-                                notice.innerText = `⏳ الدور الآن على: ${p.name} (${p.emoji})`;
+                                notice.innerText = `⏳ الدور الآن على: ${p.name}`;
                             }
                         }
                     });
@@ -840,11 +883,11 @@
 
             chatRef.push({
                 name: "🏆 إجابة صحيحة",
-                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] أجاب بـ (${chosenText}) وربح نقطة!`
+                text: `اللاعب [ ${playerName} ] أجاب بـ (${chosenText}) وربح نقطة!`
             });
         } else {
             chatRef.push({
-                name: `❌ ${playerName} ${userAvatarEmoji}`,
+                name: `❌ ${playerName}`,
                 text: `اختار إجابة خاطئة (${chosenText}) ولم يربح شيئاً.`
             });
         }
@@ -865,12 +908,12 @@
 
             chatRef.push({
                 name: `🔥 إنجاز ${actionType}`,
-                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] قام بـ (${actionType}): [ ${contentText} ] وربح نقطة بنجاح!`
+                text: `اللاعب [ ${playerName} ] قام بـ (${actionType}): [ ${contentText} ] وربح نقطة بنجاح!`
             });
         } else {
             chatRef.push({
                 name: `❌ انسحاب من ${actionType}`,
-                text: `اللاعب [ ${playerName} ${userAvatarEmoji} ] رفض أو انسحب من (${actionType}): [ ${contentText} ] (بدون نقاط).`
+                text: `اللاعب [ ${playerName} ] رفض أو انسحب من (${actionType}): [ ${contentText} ] (بدون نقاط).`
             });
         }
         nextTurn();
@@ -890,7 +933,7 @@
         const input = document.getElementById("group-chat-input");
         if(input.value.trim() === "") return;
         db.ref('rooms/' + currentRoomCode + '/chat').push({
-            name: `${playerName} ${userAvatarEmoji}`,
+            name: `${playerName}`,
             text: input.value.trim()
         });
         input.value = "";
@@ -898,6 +941,7 @@
 
     function leaveRoom() {
         if(userCloudKey && currentRoomCode) {
+            db.ref('rules' + currentRoomCode); // dummy safety
             db.ref('rooms/' + currentRoomCode + '/players/' + userCloudKey).remove();
         }
         backToLobby();
