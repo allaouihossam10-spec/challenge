@@ -313,7 +313,6 @@
             <div id="admin-controls-container" class="admin-panel hidden">
                 <div style="font-size: 14px; font-weight: bold; color: var(--danger); margin-bottom: 8px;">🛠️ لوحة تحكم الآدمن (إدارة النقاط والمتصدرين)</div>
                 
-                <!-- تعديل نقاط لاعب معين -->
                 <div style="background: #172138; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
                     <div style="font-size: 12px; color: var(--warning); margin-bottom: 4px;">إضافة أو خصم نقاط لاعب بالاسم:</div>
                     <input type="text" id="admin-target-user" placeholder="اكتب اسم اللاعب المستهدف..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
@@ -321,7 +320,6 @@
                     <button onclick="adminModifyUserPoints()" style="background: var(--accent); color: white; padding: 8px; margin: 4px 0 0 0; font-size: 13px;">تنفيذ تعديل النقاط ⚡</button>
                 </div>
 
-                <!-- حذف لاعب معين من قاعدة البيانات بالاسم -->
                 <div style="background: #172138; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
                     <div style="font-size: 12px; color: var(--danger); margin-bottom: 4px;">حذف حساب لاعب نهائياً من المتصدرين:</div>
                     <input type="text" id="admin-delete-user" placeholder="اكتب اسم اللاعب المراد حذفه..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
@@ -331,7 +329,6 @@
                 <button onclick="resetWeeklyLeaderboard()" style="background: var(--danger); color: white; padding: 10px; margin: 0; font-size: 13px;">🗑️ تصفير ومسح لوحة المتصدرين بالكامل</button>
             </div>
 
-            <!-- لائحة المتصدرين العامة -->
             <h3 style="font-size: 15px; color: var(--warning); margin: 15px 0 5px 0; text-align: right;">🏆 لوحة الشرف والمتصدرين الأسبوعية</h3>
             <div class="leaderboard-box" id="global-leaderboard-list">
                 <div style="color: var(--text-muted); text-align: center; font-size: 13px;">جاري تحميل المتصدرين...</div>
@@ -511,11 +508,20 @@
 
     window.onload = function() {
         if(playerName && playerPass) {
-            hideAllScreens();
-            document.getElementById("lobby-screen").classList.remove("hidden");
-            document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
-            checkAdminPrivileges();
-            loadGlobalLeaderboard();
+            if(!userCloudKey) {
+                // إعادة استرجاع الكي إذا كان ضاع من LocalStorage
+                db.ref('users').orderByChild('name').equalTo(playerName).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        snapshot.forEach((child) => {
+                            userCloudKey = child.key;
+                            localStorage.setItem("userCloudKey", userCloudKey);
+                        });
+                    }
+                    enterLobby();
+                });
+            } else {
+                enterLobby();
+            }
         }
     };
 
@@ -626,7 +632,6 @@
         });
     }
 
-    // ** وظيفة جديدة لحذف حساب لاعب تجريبي من قاعدة البيانات والمتصدرين **
     function adminDeleteUser() {
         const targetName = document.getElementById("admin-delete-user").value.trim().toUpperCase();
 
@@ -722,17 +727,42 @@
         document.getElementById("new-avatar-url-input").value = userAvatarUrl;
     }
 
+    // ** إصلاح دالة تحديث البروفيل لضمان الحفظ المباشر والتزامن مع السيرفر **
     function updateProfileAvatarUrl() {
         let newUrl = document.getElementById("new-avatar-url-input").value.trim();
         if(!newUrl) {
             alert("المرجو إدخال رابط صحيح للصورة!");
             return;
         }
+
+        // التأكد من وجود مفتاح المستخدم بالسحابة قبل الحفظ
+        if(!userCloudKey) {
+            db.ref('users').orderByChild('name').equalTo(playerName).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        userCloudKey = child.key;
+                        localStorage.setItem("userCloudKey", userCloudKey);
+                    });
+                    saveAvatarToCloud(newUrl);
+                } else {
+                    alert("⚠️ حدث خطأ في التعرف على الحساب. يرجى تسجيل الدخول مجدداً.");
+                }
+            });
+        } else {
+            saveAvatarToCloud(newUrl);
+        }
+    }
+
+    function saveAvatarToCloud(newUrl) {
         userAvatarUrl = newUrl;
         localStorage.setItem("userAvatarUrl", userAvatarUrl);
         document.getElementById("profile-img-display").src = userAvatarUrl;
-        if(userCloudKey) db.ref('users/' + userCloudKey + '/avatarUrl').set(userAvatarUrl);
-        alert("✅ تم تحديث صورة البروفيل بنجاح!");
+
+        db.ref('users/' + userCloudKey + '/avatarUrl').set(newUrl).then(() => {
+            alert("✅ تم تحديث وحفظ صورة البروفيل بنجاح في السيرفر!");
+        }).catch((error) => {
+            alert("❌ فشل الحفظ في السيرفر: " + error.message);
+        });
     }
 
     function openRoomSetup() {
@@ -854,6 +884,7 @@
             titleEl.innerText = "⚡ بنك التحديات الجريئة";
             let dareText = daresBank[index % daresBank.length];
             textEl.innerText = dareText;
+            optionsEl.optionsEl = "";
             optionsEl.innerHTML = `
                 <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('التحدي', '${dareText}', true)">نفذت التحدي بنجاح (+1 نقطة) ✅</button>
                 <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('التحدي', '${dareText}', false)">رفضت التحدي / انسحبت ❌</button>
@@ -941,7 +972,6 @@
 
     function leaveRoom() {
         if(userCloudKey && currentRoomCode) {
-            db.ref('rules' + currentRoomCode); // dummy safety
             db.ref('rooms/' + currentRoomCode + '/players/' + userCloudKey).remove();
         }
         backToLobby();
