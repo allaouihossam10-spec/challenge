@@ -256,6 +256,15 @@
             font-size: 14px;
         }
 
+        .admin-panel {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px dashed var(--danger);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 10px 0;
+            text-align: right;
+        }
+
         @media (max-width: 600px) {
             .container { padding: 15px; min-height: 92vh; }
             h2 { font-size: 18px; }
@@ -269,7 +278,7 @@
     <!-- 1. شاشة الدخول بالاسم وكلمة المرور -->
     <div id="login-screen">
         <h2>🔥 منصة التحديات والألغاز الجماعية</h2>
-        <p>اكتب اسمك وكلمة المرور (إذا كان لديك حساب قديم سيتم استرجاعه تلقائياً):</p>
+        <p>اكتب اسمك وكلمة المرور (إذا دخلت باسم الآدمن سيظهر لك لوحة التحكم الكاملة):</p>
         
         <input type="text" id="username" placeholder="اكتب اسمك المستعار هنا...">
         <input type="password" id="userpass" placeholder="اكتب كلمة المرور الخاصة بك...">
@@ -298,8 +307,23 @@
                 <span style="color: var(--success);">⚔️ غرف الأصدقاء (تحديات ونقاط)</span> <span style="color: var(--success);">➔</span>
             </div>
 
+            <!-- لوحة تحكم الآدمن الخاصة (تظهر فقط إذا كان اسمك هو الآدمن) -->
+            <div id="admin-controls-container" class="admin-panel hidden">
+                <div style="font-size: 14px; font-weight: bold; color: var(--danger); margin-bottom: 8px;">🛠️ لوحة تحكم الآدمن (إدارة النقاط والمتصدرين)</div>
+                
+                <!-- تعديل نقاط لاعب معين -->
+                <div style="background: #172138; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                    <div style="font-size: 12px; color: var(--warning); margin-bottom: 4px;">إضافة أو خصم نقاط لاعب بالاسم:</div>
+                    <input type="text" id="admin-target-user" placeholder="اكتب اسم اللاعب المستهدف..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
+                    <input type="number" id="admin-points-amount" placeholder="عدد النقاط (مثال: 5 أو للإزالة اكتب -5)..." style="margin: 4px 0; padding: 8px; font-size: 13px;">
+                    <button onclick="adminModifyUserPoints()" style="background: var(--accent); color: white; padding: 8px; margin: 4px 0 0 0; font-size: 13px;">تنفيذ تعديل النقاط ⚡</button>
+                </div>
+
+                <button onclick="resetWeeklyLeaderboard()" style="background: var(--danger); color: white; padding: 10px; margin: 0; font-size: 13px;">🗑️ تصفير ومسح لوحة المتصدرين بالكامل</button>
+            </div>
+
             <!-- لائحة المتصدرين العامة -->
-            <h3 style="font-size: 15px; color: var(--warning); margin: 15px 0 5px 0; text-align: right;">🏆 لوحة الشرف والمتصدرين</h3>
+            <h3 style="font-size: 15px; color: var(--warning); margin: 15px 0 5px 0; text-align: right;">🏆 لوحة الشرف والمتصدرين الأسبوعية</h3>
             <div class="leaderboard-box" id="global-leaderboard-list">
                 <div style="color: var(--text-muted); text-align: center; font-size: 13px;">جاري تحميل المتصدرين...</div>
             </div>
@@ -419,6 +443,9 @@
     let myCustomId = localStorage.getItem("myId") || "";
     let currentSelectedLoginAvatar = "😎";
 
+    // ** اسم الآدمن المعتمد **
+    const ADMIN_NAME = "HOUSSAM"; 
+
     const baseRiddles = [
         { q: "ما هو الشيء الذي كلما أخذت منه كبر وكلما وضعت فيه صغر؟", options: ["الحفرة", "الجبل", "البحر", "الكتاب"], correct: 0 },
         { q: "له عيون ولا يرى، فما هو؟", options: ["الإبرة", "القط", "المفتاح", "الباب"], correct: 0 },
@@ -484,6 +511,7 @@
             hideAllScreens();
             document.getElementById("lobby-screen").classList.remove("hidden");
             document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
+            checkAdminPrivileges();
             loadGlobalLeaderboard();
         }
     };
@@ -553,7 +581,64 @@
         hideAllScreens();
         document.getElementById("lobby-screen").classList.remove("hidden");
         document.getElementById("welcome-msg").innerText = `مرحباً بك، ${playerName}`;
+        checkAdminPrivileges();
         loadGlobalLeaderboard();
+    }
+
+    function checkAdminPrivileges() {
+        const adminPanel = document.getElementById("admin-controls-container");
+        if (playerName === ADMIN_NAME) {
+            adminPanel.classList.remove("hidden");
+        } else {
+            adminPanel.classList.add("hidden");
+        }
+    }
+
+    // ** وظيفة تعديل النقاط (إضافة أو خصم) للاعب معين كآدمن **
+    function adminModifyUserPoints() {
+        const targetName = document.getElementById("admin-target-user").value.trim().toUpperCase();
+        const pointsVal = parseInt(document.getElementById("admin-points-amount").value);
+
+        if(!targetName || isNaN(pointsVal)) {
+            alert("المرجو إدخال اسم اللاعب وعدد النقاط بشكل صحيح!");
+            return;
+        }
+
+        db.ref('users').orderByChild('name').equalTo(targetName).once('value', (snapshot) => {
+            if(snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    let userKey = child.key;
+                    let currentScore = child.val().score || 0;
+                    let newScore = currentScore + pointsVal;
+                    if(newScore < 0) newScore = 0; // لضمان عدم نزول النقاط تحت الصفر
+
+                    db.ref('users/' + userKey + '/score').set(newScore).then(() => {
+                        alert(`✅ تم تحديث نقاط اللاعب (${targetName}) بنجاح. أصبحت نقاطه: ${newScore}`);
+                        document.getElementById("admin-target-user").value = "";
+                        document.getElementById("admin-points-amount").value = "";
+                        loadGlobalLeaderboard();
+                    });
+                });
+            } else {
+                alert("❌ عذراً، لم يتم العثور على لاعب بهذا الاسم في قاعدة البيانات!");
+            }
+        });
+    }
+
+    function resetWeeklyLeaderboard() {
+        if(confirm("⚠️ هل أنت متأكد من رغبتك في تصفير نقاط الجميع وبدء أسبوع جديد؟ سيتم مسح النقاط وإعادتها إلى الصفر.")) {
+            db.ref('users').once('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        db.ref('users/' + childSnapshot.key + '/score').set(0);
+                    });
+                    myScore = 0;
+                    localStorage.setItem("myScore", 0);
+                    alert("✅ تم تصفير لوحة المتصدرين بنجاح وبدء أسبوع جديد!");
+                    loadGlobalLeaderboard();
+                }
+            });
+        }
     }
 
     function logout() {
@@ -726,7 +811,6 @@
             titleEl.innerText = "⚡ بنك التحديات الجريئة";
             let dareText = daresBank[index % daresBank.length];
             textEl.innerText = dareText;
-            // خيارين: تنفيذ التحدي (يأخذ نقطة) أو رفض/انسحاب (بدون نقطة)
             optionsEl.innerHTML = `
                 <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('التحدي', '${dareText}', true)">نفذت التحدي بنجاح (+1 نقطة) ✅</button>
                 <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('التحدي', '${dareText}', false)">رفضت التحدي / انسحبت ❌</button>
@@ -735,7 +819,6 @@
             titleEl.innerText = "💬 بنك الاعترافات الصريحة";
             let confessText = confessionsBank[index % confessionsBank.length];
             textEl.innerText = confessText;
-            // خيارين: اعترف بصراحة (يأخذ نقطة) أو رفض الاعتراف (بدون نقطة)
             optionsEl.innerHTML = `
                 <button class="btn-primary" style="background: var(--success);" onclick="announceTurnAction('الاعتراف', '${confessText}', true)">اعترفت بصراحة تامة (+1 نقطة) 🤫</button>
                 <button class="btn-primary" style="background: var(--danger);" onclick="announceTurnAction('الاعتراف', '${confessText}', false)">رفضت الاعتراف صامتاً 🤐</button>
